@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restitution Agile en Seine - Finale V21</title>
+   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🚀</text></svg>">
+   <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <style>
+        /* --- 1. STRUCTURE & RESET --- */
+        html, body { margin: 0; padding: 0; width: 100%; height: 100%; background-color: #0f172a; font-family: 'Outfit', sans-serif; color: #334155; overflow: hidden; }
+        
+        .presentation-container { 
+            width: 100%; height: 100%; 
+            overflow-y: scroll; 
+            scroll-snap-type: y mandatory; 
+            scroll-behavior: smooth; 
+        }
+
+        .slide-wrapper { 
+            width: 100%; height: 100%; 
+            display: flex; 
+            justify-content: center;
+            align-items: center;
+            scroll-snap-align: start; 
+            background-color: #f1f5f9; 
+            overflow: hidden; 
+            position: relative;
+        }
+        
+        /* --- 2. LA CARTE SLIDE --- */
+        .slide-content { 
+            width: 1280px; 
+            height: 720px; 
+            flex-shrink: 0;
+            background-color: white; 
+            box-shadow: 0 0 0 1px rgba(0,0,0,0.05), 0 25px 50px -12px rgba(0, 0, 0, 0.4); 
+            border-radius: 16px; 
+            overflow: hidden; 
+            display: grid; 
+            box-sizing: border-box;
+            transform-origin: center center;
+        }
+
+        /* --- 3. TYPOGRAPHIE --- */
+        h1 { font-family: 'Playfair Display', serif; font-size: 72px; color: #1e293b; margin-bottom: 1rem; line-height: 1.1; }
+        
+        h2.slide-title { 
+            font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 46px; color: #0f172a; 
+            margin-bottom: 30px; padding-bottom: 15px; border-bottom: 6px solid #3b82f6; display: inline-block; 
+        }
+
+        p, li { font-size: 20px; line-height: 1.5; color: #475569; }
+        li { margin-bottom: 10px; padding-left: 35px; position: relative; }
+        li::before { content: '\f058'; font-family: 'Font Awesome 6 Free'; font-weight: 900; color: #3b82f6; position: absolute; left: 0; top: 3px; font-size: 20px; }
+
+        /* --- 4. LAYOUTS --- */
+        
+        .layout-intro { 
+            padding: 50px; 
+            background: radial-gradient(circle at center, #eff6ff 0%, #dbeafe 100%); 
+            display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; 
+        }
+        
+        .layout-stats { 
+            padding: 50px; 
+            background-color: #ffffff; 
+            display: flex; flex-direction: column; justify-content: center; align-items: center; 
+        } 
+        .layout-stats .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px; width: 100%; margin-top: 40px; padding: 0 60px; }
+        .stat-card { background: #ffffff; border: 1px solid #f1f5f9; border-radius: 20px; padding: 40px 20px; text-align: center; box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.08); transition: transform 0.3s ease; }
+        .stat-number { font-size: 64px; font-weight: 800; color: #0f172a; display: block; line-height: 1; margin-bottom: 10px; }
+        .stat-label { font-size: 18px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 1.5px; }
+        .stat-icon { font-size: 50px; color: #3b82f6; margin-bottom: 20px; display: block; }
+
+        /* NOUVEAU LAYOUT : CARDS (Pour la slide 8) */
+        .layout-cards { 
+            padding: 50px; 
+            background-color: #ffffff; 
+            display: flex; flex-direction: column; justify-content: center; align-items: center; 
+        }
+        .cards-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; width: 100%; margin-top: 30px; }
+        .text-card { 
+            background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 16px; padding: 30px; 
+            text-align: left; height: 100%; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+        }
+        .text-card h3 { color: #3b82f6; font-size: 24px; margin-bottom: 20px; font-weight: 700; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; }
+        .text-card ul { padding-left: 0; margin: 0; list-style: none; }
+        .text-card li { font-size: 18px; margin-bottom: 12px; color: #475569; padding-left: 25px; }
+        .text-card li::before { font-size: 16px; top: 4px; }
+
+        .layout-two-col { grid-template-columns: 1fr 1fr; }
+        .col-text { padding: 50px; display: flex; flex-direction: column; justify-content: center; }
+        .col-media { padding: 50px; display: flex; align-items: center; justify-content: center; background-color: #f8fafc; height: 100%; }
+        .media-frame { width: 100%; height: 100%; max-height: 500px; border-radius: 12px; overflow: hidden; position: relative; background: #cbd5e1; }
+        .media-frame img { width: 100%; height: 100%; object-fit: cover; }
+
+        .layout-bleed { grid-template-columns: 45% 55%; }
+        .bleed-text { padding: 50px; background-color: #0f172a; color: white; display: flex; flex-direction: column; justify-content: center; }
+        .bleed-text h2.slide-title { color: white; border-color: #38bdf8; }
+        .bleed-text p, .bleed-text li { color: #cbd5e1; }
+        .bleed-media img { width: 100%; height: 100%; object-fit: cover; }
+
+        .layout-focus { padding: 50px; background-color: #1e293b; color: white; grid-template-rows: auto 1fr; gap: 20px; }
+        .focus-content { display: grid; grid-template-columns: 1fr 1fr; gap: 50px; align-items: center; height: 100%; }
+        .focus-card { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 30px; border-radius: 16px; }
+        .focus-card p { font-family: monospace; color: #94a3b8; font-size: 18px; line-height: 1.4; }
+
+        .layout-debate { background: linear-gradient(135deg, #f8fafc 50%, #e2e8f0 50%); display: grid; grid-template-columns: 1fr 1fr; }
+        .debate-side { padding: 50px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
+        
+        .layout-qa { padding: 50px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; background-color: #0f172a; color: white; }
+        .layout-qa h1 { font-size: 120px; margin-bottom: 20px; color: white; }
+        .layout-qa p.subtitle { font-size: 32px; color: #94a3b8; margin-bottom: 60px; font-weight: 300; }
+        
+        .speakers-footer { display: flex; gap: 80px; margin-top: 20px; padding-top: 40px; border-top: 1px solid rgba(255,255,255,0.1); }
+        .speaker-box { text-align: center; }
+        .speaker-name { display: block; font-size: 24px; font-weight: 700; color: white; margin-bottom: 5px; }
+        .speaker-role { display: block; font-size: 16px; color: #60a5fa; font-family: 'Outfit'; text-transform: uppercase; letter-spacing: 1px; }
+
+        .layout-gallery { padding: 50px; background-color: white; display: flex; flex-direction: column; }
+        .gallery-container { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; height: 100%; margin-top: 20px; }
+        .gallery-item { display: flex; flex-direction: column; height: 100%; }
+        .gallery-frame { flex-grow: 1; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 20px rgba(0,0,0,0.1); background-color: #e2e8f0; position: relative; }
+        .gallery-frame img { width: 100%; height: 100%; object-fit: contain; background-color: #f1f5f9; }
+        .gallery-caption { margin-top: 15px; text-align: center; font-weight: 700; color: #64748b; font-size: 18px; }
+
+        .highlight-box { background: rgba(255,255,255,0.1); border-left: 4px solid #38bdf8; padding: 20px; margin: 20px 0; }
+        .fake-player-overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.2); display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .play-btn { font-size: 70px; color: #ff0000; background: white; border-radius: 50%; width: 80px; height: 80px; display: flex; align-items: center; justify-content: center; }
+
+        /* BOUTON PLEIN ÉCRAN */
+        .fullscreen-btn {
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
+            width: 60px;
+            height: 60px;
+            background-color: rgba(15, 23, 42, 0.7);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            cursor: pointer;
+            z-index: 10000;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            backdrop-filter: blur(5px);
+        }
+        .fullscreen-btn:hover {
+            background-color: #3b82f6;
+            transform: scale(1.1);
+            border-color: #3b82f6;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Bouton Plein Écran -->
+<button class="fullscreen-btn" onclick="toggleFullscreen()" title="Basculer en Plein Écran">
+    <i class="fa-solid fa-expand" id="fs-icon"></i>
+</button>
+
+<div class="presentation-container">
+
+    <!-- SLIDE 1: INTRO -->
+    <div class="slide-wrapper">
+        <div class="slide-content layout-intro">
+            <div style="margin-bottom: 30px; color: #3b82f6;"><i class="fa-solid fa-microphone-lines fa-4x"></i></div>
+            <h1>Restitution Agile en Seine</h1>
+            <h2 style="font-family: 'Outfit'; font-weight: 300; font-size: 32px; color: #64748b; margin-top: 10px;">REX & Feedback de l'événement</h2>
+            <div style="margin-top: 60px; display: flex; gap: 60px; align-items: center;">
+                <div style="text-align: right;"><span style="display: block; font-weight: 700; font-size: 20px;">Marie Blondel</span><span style="font-size: 16px; color: #64748b;">PM / Gamme Pilot</span></div>
+                <div style="height: 40px; width: 2px; background: #cbd5e1;"></div>
+                <div style="text-align: left;"><span style="display: block; font-weight: 700; font-size: 20px;">Sébastien Darré</span><span style="font-size: 16px; color: #64748b;">PO / PRAC</span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 2: STATS -->
+    <div class="slide-wrapper">
+        <div class="slide-content layout-stats">
+            <h2 class="slide-title">Agile en Seine c'est quoi ?</h2>
+            <p style="text-align: center; max-width: 800px;">Le rendez-vous incontournable de la communauté Agile francilienne.</p>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fa-regular fa-calendar-check"></i></div>
+                    <span class="stat-number">2</span>
+                    <span class="stat-label">Journées Intenses</span>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fa-solid fa-users"></i></div>
+                    <span class="stat-number">2000</span>
+                    <span class="stat-label">Participants</span>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fa-solid fa-microphone-alt"></i></div>
+                    <span class="stat-number">50+</span>
+                    <span class="stat-label">Conférences</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 3: SÉLECTION -->
+    <div class="slide-wrapper">
+        <div class="slide-content layout-two-col">
+            <div class="col-text">
+                <h2 class="slide-title">Notre Fil Rouge</h2>
+                <p>Pourquoi cette sélection ? Nous avons cherché à répondre à une question centrale :</p>
+                <div style="margin-top: 30px; background: #fff; border-left: 5px solid #3b82f6; padding-left: 20px;">
+                    <p style="font-size: 24px; color: #3b82f6; font-weight: 700;">"Comment l'IA transforme-t-elle l'Agilité en 2025 ?"</p>
+                </div>
+                <p style="margin-top: 30px; font-size: 18px; color: #64748b;">
+                    1. <strong>L'Humain</strong> augmenté par l'IA<br>
+                    2. <strong>La Valeur</strong> par le découpage fin<br>
+                    3. <strong>L'Outil</strong> au service du Product Owner
+                </p>
+            </div>
+            <div class="col-media">
+                <div class="media-frame">
+                    <img 
+                        src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=2070&auto=format&fit=crop" 
+                        alt="Selection Process"
+                    >
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 4: CONF 1: SOFTEAM -->
+    <div class="slide-wrapper">
+        <div class="slide-content layout-two-col">
+            <div class="col-text">
+                <span style="color: #64748b; font-weight: 700; text-transform: uppercase; font-size: 14px;">Conférence #1 • Softeam</span>
+                <h2 class="slide-title">L’Agilité Augmentée</h2>
+                <p>L'IA comme "collègue virtuel" et non comme remplaçant.</p>
+                <ul>
+                    <li><strong>Synergie Hybride :</strong> L'IA pour la vitesse et l'analyse, l'humain pour le sens.</li>
+                    <li><strong>Méthode PBP :</strong> Structurer les prompts (Persona - Besoin - Produit).</li>
+                    <li><strong>Sécurité :</strong> L'humain garde le contrôle, l'IA exécute.</li>
+                </ul>
+                <div style="background: #eff6ff; padding: 20px; border-radius: 12px; margin-top: 25px; border: 1px solid #dbeafe;">
+                    <i class="fa-solid fa-lightbulb" style="color: #2563eb; margin-right: 10px;"></i>
+                    <strong style="color: #1e40af;">Action :</strong> Tester le framework "Contexte – Rôle – Résultat".
+                </div>
+            </div>
+            <div class="col-media">
+                <div class="media-frame">
+                    <img src="https://images.unsplash.com/photo-1552664730-d307ca884978?q=80&w=2070&auto=format&fit=crop" alt="Collaboration Humain IA">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 5: FOCUS TECHNIQUE 1 -->
+    <div class="slide-wrapper">
+        <div class="slide-content layout-focus">
+            <div>
+                <span style="color: #38bdf8; font-weight: 700;">FOCUS PRATIQUE</span>
+                <h2 class="slide-title" style="color: white; border-color: #38bdf8;">Le Framework de Prompting</h2>
+            </div>
+            <div class="focus-content">
+                <div>
+                    <p style="color: #cbd5e1;">Pour éviter les hallucinations, Softeam propose la structure <strong>P.B.P</strong> :</p>
+                    <ul>
+                        <li><strong>Persona :</strong> "Agis comme un expert Scrum..."</li>
+                        <li><strong>Besoin :</strong> "Analyse ce backlog..."</li>
+                        <li><strong>Produit :</strong> "Génère un tableau des risques."</li>
+                    </ul>
+                </div>
+                <div class="focus-card">
+                    <i class="fa-solid fa-code" style="font-size: 40px; color: #38bdf8; margin-bottom: 20px;"></i>
+                    <p style="font-size: 20px; font-family: monospace; color: #94a3b8;">
+                        > ACT AS a Senior PO<br>
+                        > ANALYZE these 5 user stories<br>
+                        > OUTPUT a JSON with acceptance criteria
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 6: CONF 2: ROADMAP NARRATIVE -->
+    <div class="slide-wrapper">
+        <div class="slide-content layout-two-col">
+            <div class="col-text">
+                <span style="color: #64748b; font-weight: 700; text-transform: uppercase; font-size: 14px; letter-spacing: 1px; margin-bottom: 10px; display:block;">Conférence #2 • Le Futur de la Roadmap</span>
+                <h2 class="slide-title">Roadmap Narrative</h2>
+                <p>Quand le produit s'efface au profit de l'histoire utilisateur.</p>
+                <ul>
+                    <li><strong>Constat :</strong> Roadmaps "listes de courses" trop chargées de fonctionnalités obscures et centrées Coûts/Délais.</li>
+                    <li><strong>Le Shift :</strong> Passer à une roadmap centrée sur la valeur, l'impact et l'usage.</li>
+                    <li><strong>L'Objectif :</strong> Raconter une histoire de progrès pour le bénéficiaire.</li>
+                </ul>
+            </div>
+            <div class="col-media">
+                <div class="media-frame">
+                    <img 
+                        src="https://images.unsplash.com/photo-1558403194-611308249627?q=80&w=2070&auto=format&fit=crop" 
+                        alt="Roadmap Narrative Concept"
+                    >
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 7: FOCUS VISUEL 2 -->
+    <div class="slide-wrapper">
+        <div class="slide-content layout-two-col">
+            <div class="col-media" style="background: #1e293b; display: flex; align-items: center; justify-content: center;">
+                <!-- Concept Visuel : L'histoire vs La liste -->
+                <div style="display: flex; flex-direction: column; gap: 30px; width: 80%; text-align: center;">
+                    <div style="background: rgba(255,255,255,0.1); padding: 20px; border-radius: 8px; border: 1px dashed #64748b;">
+                        <span style="color: #94a3b8; font-size: 16px;">AVANT (Fonctionnalité)</span><br>
+                        <strong style="color: #ef4444; font-size: 22px;">"Livrer écran Login V2"</strong>
+                    </div>
+                    <div style="color: #38bdf8; font-size: 24px;"><i class="fa-solid fa-arrow-down"></i></div>
+                    <div style="background: rgba(56, 189, 248, 0.2); padding: 20px; border-radius: 8px; border: 1px solid #38bdf8;">
+                        <span style="color: #38bdf8; font-size: 16px;">APRÈS (Histoire/Capacité)</span><br>
+                        <strong style="color: white; font-size: 22px;">"Donner le super-pouvoir d'accéder à son espace en 1 clic"</strong>
+                    </div>
+                </div>
+            </div>
+            <div class="col-text">
+                <span style="color: #3b82f6; font-weight: 700;">CONCEPT CLÉ</span>
+                <h2 class="slide-title">Histoires vs Fonctionnalités</h2>
+                <p>Ne vendez plus des écrans ou des bases de données.</p>
+                <p><strong>Vendez des super-pouvoirs</strong> (Capacités) que vous donnez à vos utilisateurs.</p>
+                <div style="margin-top: 20px; font-weight: bold; color: #3b82f6;">
+                    <i class="fa-solid fa-quote-left"></i> La roadmap n'est plus une liste de livrables, mais une histoire de progrès.<i class="fa-solid fa-quote-right"></i> 
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 8: UNE HISTOIRE CLAIRE -->
+    <div class="slide-wrapper">
+        <div class="slide-content layout-cards">
+            <h2 class="slide-title">Comment raconter cette histoire ?</h2>
+            <div class="cards-grid">
+                <!-- Carte 1 -->
+                <div class="text-card">
+                    <h3>Valeur & Impact</h3>
+                    <ul>
+                        <li>Identifier les <strong>Personas</strong> (bénéficiaires).</li>
+                        <li>Définir le <strong>Futur Désiré</strong> ensemble.</li>
+                        <li>Sortir de la confrontation DSI/Métier pour co-construire.</li>
+                    </ul>
+                </div>
+                <!-- Carte 2 -->
+                <div class="text-card">
+                    <h3>Visibilité Bénéfices</h3>
+                    <ul>
+                        <li>Imaginer des <strong>mises en situation</strong> réelles.</li>
+                        <li>Parler de <strong>capacités</strong> ("super-pouvoirs").</li>
+                        <li>Roadmap = progression de ces capacités dans le temps.</li>
+                    </ul>
+                </div>
+                <!-- Carte 3 -->
+                <div class="text-card">
+                    <h3>Culture de l'Usage</h3>
+                    <ul>
+                        <li>Centrer sur l'<strong>Usage</strong> vs Liste de fonctionnalités.</li>
+                        <li>Mesurer la progression de la capacité chez le bénéficiaire.</li>
+                        <li>Accompagner la mise en œuvre au quotidien.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 9: MISE EN PRATIQUE (VOS PHOTOS LOCALES) -->
+    <div class="slide-wrapper">
+        <div class="slide-content layout-gallery">
+            <h2 class="slide-title">Mise en Pratique : L'Exemple "Etienne & Sophie"</h2>
+            <div class="gallery-container">
+                <div class="gallery-item">
+                    <div class="gallery-frame">
+                        <!-- REFERENCE AU FICHIER LOCAL 1 -->
+                        <div style="left: 0; width: 100%; height: 0; position: relative; padding-bottom: 75%;"><iframe alt="Parcours Utilisateur" src="https://drive.google.com/file/d/1ZL_axOfqZNSAaLllbL2r9pc4WGS__qhO/preview" style="top: 0; left: 0; width: 100%; height: 100%; position: absolute; border: 0;" allowfullscreen></iframe></div>
+                    </div>
+                    <div class="gallery-caption">Le Parcours Narratif</div>
+                </div>
+                <div class="gallery-item">
+                    <div class="gallery-frame">
+                        <!-- REFERENCE AU FICHIER LOCAL 2 -->
+						<div style="left: 0; width: 100%; height: 0; position: relative; padding-bottom: 75%;"><iframe alt="Roadmap Utilisateur" src="https://drive.google.com/file/d/1P15iCxOzK-rW-LALtQIsOTqmjRlH-hTg/preview" style="top: 0; left: 0; width: 100%; height: 100%; position: absolute; border: 0;" allowfullscreen></iframe></div>
+                    </div>
+                    <div class="gallery-caption">La Roadmap Utilisateur</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 10: CONF 3: RENAUD -->
+    <div class="slide-wrapper">
+        <div class="slide-content layout-bleed">
+            <div class="bleed-text">
+                <span style="color: #94a3b8; font-weight: 700; text-transform: uppercase; font-size: 14px; letter-spacing: 1px; margin-bottom: 10px; display:block;">Conférence #3 • Renaud Chevalier</span>
+                <h2 class="slide-title">Au-delà du Bruit</h2>
+                
+                <div class="highlight-box">
+                    <span style="font-size: 36px; font-weight: 800; color: #38bdf8; display: block;">10 min & 2€</span>
+                    <p style="margin:0; font-size: 18px; color: #cbd5e1;">Coût pour générer un backlog complet par IA.</p>
+                </div>
+
+                <ul>
+                    <li><strong>Le Constat :</strong> Une IA fait le job "opérationnel" (US, specs) avec une qualité de 7/10.</li>
+                    <li><strong>Le Shift :</strong> Le "Comment" est géré par la machine.</li>
+                    <li><strong>La Valeur :</strong> L'humain doit se concentrer sur le "Pourquoi" et l'audace.</li>
+                </ul>
+            </div>
+            <div class="bleed-media">
+                <img src="https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=2070&auto=format&fit=crop" alt="Signal Wave">
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 11: DÉBAT -->
+    <div class="slide-wrapper">
+        <div class="slide-content layout-debate">
+            <div class="debate-side">
+                <i class="fa-solid fa-robot" style="font-size: 60px; color: #64748b; margin-bottom: 20px;"></i>
+                <h3 style="font-size: 32px; color: #0f172a;">Ce que l'IA fera</h3>
+                <p>Rédiger les US<br>Générer les Tests<br>Analyser la Data</p>
+            </div>
+            <div class="debate-side" style="background: white; box-shadow: -10px 0 20px rgba(0,0,0,0.05);">
+                <i class="fa-solid fa-heart" style="font-size: 60px; color: #ef4444; margin-bottom: 20px;"></i>
+                <h3 style="font-size: 32px; color: #0f172a;">Ce qu'il nous reste</h3>
+                <p>Négocier avec les Stakeholders<br>L'Empathie Utilisateur<br>La Vision Stratégique</p>
+                <div style="margin-top: 30px; border: 2px dashed #3b82f6; padding: 10px 20px; border-radius: 50px; color: #3b82f6; font-weight: bold;">
+                    Question ouverte : Êtes-vous prêts ?
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 12: ATELIER N8N -->
+    <div class="slide-wrapper">
+        <div class="slide-content layout-two-col">
+            <div class="col-text">
+                <span style="color: #64748b; font-weight: 700; text-transform: uppercase; font-size: 14px; letter-spacing: 1px; margin-bottom: 10px; display:block;">Atelier #4 • Pratique</span>
+                <h2 class="slide-title">Créer son Agent PO</h2>
+                <p style="margin-bottom: 20px;">Démonstration de la souveraineté technique via le No-Code (N8N).</p>
+                <ul>
+                    <li><strong>Automatisation :</strong> Orchestrer des flux complexes (IA -> Jira) sans coder.</li>
+                    <li><strong>Cas d'usage :</strong> Transformer une demande brute en User Story propre.</li>
+                    <li><strong>Souveraineté :</strong> Maîtriser ses outils et ses données.</li>
+                </ul>
+            </div>
+					<div class="col-media">
+						<div class="media-frame" style="background: black;">
+							<!-- LECTEUR YOUTUBE INTÉGRÉ -->
+							<iframe 
+								width="100%" 
+								height="100%" 
+								src="https://www.youtube.com/embed/-Uwo1x-YAE4?start=1055" 
+								title="YouTube video player" 
+								frameborder="0" 
+								allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+								referrerpolicy="strict-origin-when-cross-origin" 
+								allowfullscreen>
+							</iframe>
+						</div>
+					</div>
+        </div>
+    </div>
+
+    <!-- SLIDE 13: PLAN D'ACTION -->
+    <div class="slide-wrapper">
+        <div class="slide-content layout-stats">
+            <h2 class="slide-title">Dès Lundi Matin...</h2>
+            <div class="stats-grid">
+                <div class="stat-card" style="border-top: 5px solid #3b82f6;">
+                    <div class="stat-icon"><i class="fa-solid fa-vial"></i></div>
+                    <span class="stat-label" style="color: #0f172a; font-weight: 700;">Expérimenter</span>
+                    <p style="font-size: 18px;">Tester 1 prompt structuré sur une User Story.</p>
+                </div>
+                <div class="stat-card" style="border-top: 5px solid #eab308;">
+                    <div class="stat-icon"><i class="fa-solid fa-scissors"></i></div>
+                    <span class="stat-label" style="color: #0f172a; font-weight: 700;">Découper</span>
+                    <p style="font-size: 18px;">Refuser de lancer une US si elle n'est pas "invest".</p>
+                </div>
+                <div class="stat-card" style="border-top: 5px solid #ef4444;">
+                    <div class="stat-icon"><i class="fa-solid fa-rocket"></i></div>
+                    <span class="stat-label" style="color: #0f172a; font-weight: 700;">Automatiser</span>
+                    <p style="font-size: 18px;">Regarder le tuto N8N.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 14: Q&A -->
+    <div class="slide-wrapper">
+        <div class="slide-content layout-qa">
+            <i class="fa-regular fa-comments" style="font-size: 80px; color: #60a5fa; margin-bottom: 30px;"></i>
+            <h1>Questions ?</h1>
+            <p>Merci de votre attention.</p>
+            <div class="speakers-footer">
+                <div class="speaker-box">
+                    <span class="speaker-name">Marie Blondel</span>
+                    <span class="speaker-role">Product Manager</span>
+                </div>
+                <div class="speaker-box">
+                    <span class="speaker-name">Sébastien Darré</span>
+                    <span class="speaker-role">Product Owner</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- SCRIPT DE MISE À L'ÉCHELLE ROBUSTE -->
+<script>
+    function scaleSlides() {
+        const slides = document.querySelectorAll('.slide-content');
+        const windowWidth = window.innerWidth;
+        const windowHeight = window.innerHeight;
+        // Ratio de sécurité (0.9)
+        const scale = Math.min(
+            (windowWidth / 1280) * 0.9,
+            (windowHeight / 720) * 0.9
+        );
+
+        slides.forEach(slide => {
+            slide.style.transform = `scale(${scale})`;
+        });
+    }
+
+    // Gestion du Plein Écran
+    function toggleFullscreen() {
+        const icon = document.getElementById('fs-icon');
+        
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen().catch(err => {
+                console.error(`Erreur: ${err.message}`);
+            });
+            icon.classList.remove('fa-expand');
+            icon.classList.add('fa-compress');
+        } else {
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+            }
+            icon.classList.remove('fa-compress');
+            icon.classList.add('fa-expand');
+        }
+    }
+
+    // Écouteur pour mettre à jour l'icône si l'utilisateur utilise Echap
+    document.addEventListener('fullscreenchange', () => {
+        const icon = document.getElementById('fs-icon');
+        if (!document.fullscreenElement) {
+            icon.classList.remove('fa-compress');
+            icon.classList.add('fa-expand');
+        } else {
+            icon.classList.remove('fa-expand');
+            icon.classList.add('fa-compress');
+        }
+        // Forcer le recalcul du scale après transition
+        setTimeout(scaleSlides, 100);
+    });
+
+    // Déclenchement multiple pour la sécurité
+    window.addEventListener('load', scaleSlides);
+    window.addEventListener('resize', scaleSlides);
+    setTimeout(scaleSlides, 500); // Au cas où
+</script>
+
+</body>
+</html>
