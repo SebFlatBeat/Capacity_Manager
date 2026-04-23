@@ -3,7 +3,7 @@
 --
 
 SET statement_timeout = 0;
-SET client_encoding = 'SQL_ASCII';
+SET client_encoding = 'UTF8';
 SET standard_conforming_strings = on;
 SET check_function_bodies = false;
 SET client_min_messages = warning;
@@ -869,7 +869,7 @@ COPY kpi_ratios_equipe (id_ratio, id_equipe, pi_code, point_dev_jour, point_dev_
 
 COPY membres (id_membre, id_equipe, id_pays, nom, role, taux_plein, velocity_base) FROM stdin;
 3	1	1	Axel	RT	15	\N
-4	1	2	Andrés	Dev	15	\N
+4	1	2	AndrÃ©s	Dev	15	\N
 5	1	2	Mehdi	Dev	15	\N
 6	1	1	Nicolas	Dev	15	\N
 7	1	1	Julien	Dev	15	\N
@@ -882,7 +882,7 @@ COPY membres (id_membre, id_equipe, id_pays, nom, role, taux_plein, velocity_bas
 15	2	2	Sergio	Dev	15	\N
 16	2	1	Marina	Dev	15	\N
 17	2	1	Aya	Dev	15	\N
-2	1	1	Valérie	PPO	15	\N
+2	1	1	ValÃ©rie	PPO	15	\N
 1	1,2	1	Tim	SM	15	\N
 18	1	1	Mathilde	PO	15	\N
 \.
