@@ -10,6 +10,21 @@ if (!isset($dbconn) || !$dbconn) {
 
 $method = $_SERVER['REQUEST_METHOD'];
 
+if ($method === 'DELETE') {
+    $pi = isset($_GET['pi']) ? pg_escape_string($dbconn, utf8_decode($_GET['pi'])) : '';
+    if ($pi) {
+        $query = "DELETE FROM historique_pi WHERE pi_code = $1";
+        if (@pg_query_params($dbconn, $query, array($pi))) {
+            echo json_encode(array("status" => "success"));
+        } else {
+            echo json_encode(array("status" => "error", "message" => "Impossible de supprimer le PI."));
+        }
+    } else {
+        echo json_encode(array("status" => "error", "message" => "Code PI manquant."));
+    }
+    exit;
+}
+
 if ($method === 'POST') {
     $data = json_decode(file_get_contents('php://input'), true);
     $action = isset($data['action']) ? $data['action'] : 'save';
