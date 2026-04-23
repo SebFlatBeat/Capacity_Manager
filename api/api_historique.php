@@ -1,10 +1,12 @@
 <?php
-ini_set('display_errors', 0); 
+ini_set('display_errors', 0);
 error_reporting(0);
 header('Content-Type: application/json; charset=utf-8');
-require '../config/db.php';
+require_once '../config/db.php';
 
-if (!isset($dbconn) || !$dbconn) { exit; }
+if (!isset($dbconn) || !$dbconn) {
+    exit;
+}
 
 $method = $_SERVER['REQUEST_METHOD'];
 
@@ -12,10 +14,10 @@ if ($method === 'POST') {
     $data = json_decode(file_get_contents('php://input'), true);
     $action = isset($data['action']) ? $data['action'] : 'save';
     $pi = pg_escape_string($dbconn, utf8_decode($data['pi']));
-    
+
     if ($action === 'close_pi') {
-        $query = "UPDATE historique_pi SET statut = 'ARCHIVE' WHERE pi_code = '$pi'";
-        if(@pg_query($dbconn, $query)) {
+        $query = "UPDATE historique_pi SET statut = 'ARCHIVE' WHERE pi_code = $1";
+        if (@pg_query_params($dbconn, $query, array($pi))) {
             echo json_encode(array("status" => "success"));
         } else {
             echo json_encode(array("status" => "error"));
@@ -27,35 +29,38 @@ if ($method === 'POST') {
     $build = (float)$data['build'];
     $ordre = (int)$data['ordre'];
     $statut = isset($data['statut']) ? pg_escape_string($dbconn, $data['statut']) : 'PLANIFICATION';
-    
+
     // Nouvelles colonnes
-    $d_debut = isset($data['date_debut']) && $data['date_debut'] ? "'" . pg_escape_string($dbconn, $data['date_debut']) . "'" : "NULL";
-    $d_fin = isset($data['date_fin']) && $data['date_fin'] ? "'" . pg_escape_string($dbconn, $data['date_fin']) . "'" : "NULL";
+    $d_debut = isset($data['date_debut']) && $data['date_debut'] ? pg_escape_string($dbconn, $data['date_debut']) : null;
+    $d_fin = isset($data['date_fin']) && $data['date_fin'] ? pg_escape_string($dbconn, $data['date_fin']) : null;
     $iters = isset($data['iterations']) ? (int)$data['iterations'] : 4;
     $days_iter = isset($data['jours_par_iteration']) ? (int)$data['jours_par_iteration'] : 15;
 
-    $mco = isset($data['mco']) && $data['mco'] !== '' && $data['mco'] !== null ? (float)$data['mco'] : 'NULL';
-    $tra = isset($data['tra']) && $data['tra'] !== '' && $data['tra'] !== null ? (float)$data['tra'] : 'NULL';
-	$anomalies = isset($data['anomalies']) && $data['anomalies'] !== '' && $data['anomalies'] !== null ? (float)$data['anomalies'] : 'NULL';
-    
-    $apollo = isset($data['teams']['apollo']) && $data['teams']['apollo'] !== '' && $data['teams']['apollo'] !== null ? (float)$data['teams']['apollo'] : 'NULL';
-    $disco = isset($data['teams']['disco']) && $data['teams']['disco'] !== '' && $data['teams']['disco'] !== null ? (float)$data['teams']['disco'] : 'NULL';
-    $allstars = isset($data['teams']['allstars']) && $data['teams']['allstars'] !== '' && $data['teams']['allstars'] !== null ? (float)$data['teams']['allstars'] : 'NULL';
+    $mco = isset($data['mco']) && $data['mco'] !== '' && $data['mco'] !== null ? (float)$data['mco'] : null;
+    $tra = isset($data['tra']) && $data['tra'] !== '' && $data['tra'] !== null ? (float)$data['tra'] : null;
+    $anomalies = isset($data['anomalies']) && $data['anomalies'] !== '' && $data['anomalies'] !== null ? (float)$data['anomalies'] : null;
 
-    $check_query = "SELECT 1 FROM historique_pi WHERE pi_code = '$pi'";
-    $check_result = pg_query($dbconn, $check_query);
+    $apollo = isset($data['teams']['apollo']) && $data['teams']['apollo'] !== '' && $data['teams']['apollo'] !== null ? (float)$data['teams']['apollo'] : null;
+    $disco = isset($data['teams']['disco']) && $data['teams']['disco'] !== '' && $data['teams']['disco'] !== null ? (float)$data['teams']['disco'] : null;
+    $allstars = isset($data['teams']['allstars']) && $data['teams']['allstars'] !== '' && $data['teams']['allstars'] !== null ? (float)$data['teams']['allstars'] : null;
+
+    $check_query = 'SELECT 1 FROM historique_pi WHERE pi_code = $1';
+    $check_result = pg_query_params($dbconn, $check_query, array($pi));
 
     if ($check_result && pg_num_rows($check_result) > 0) {
-        $query = "UPDATE historique_pi SET 
-                  total_pts = $total, build_pts = $build, mco_pts = $mco, tra_pts = $tra, anomalies_build_pts = $anomalies, 
-                  apollo_pts = $apollo, disco_pts = $disco, allstars_pts = $allstars, ordre = $ordre, statut = '$statut',
-                  date_debut = $d_debut, date_fin = $d_fin, iterations = $iters, jours_par_iteration = $days_iter
-                  WHERE pi_code = '$pi'";
+        $query = 'UPDATE historique_pi SET
+                  total_pts = $1, build_pts = $2, mco_pts = $3, tra_pts = $4, anomalies_build_pts = $5,
+                  apollo_pts = $6, disco_pts = $7, allstars_pts = $8, ordre = $9, statut = $10,
+                  date_debut = $11, date_fin = $12, iterations = $13, jours_par_iteration = $14
+                  WHERE pi_code = $15';
+        $params = array($total, $build, $mco, $tra, $anomalies, $apollo, $disco, $allstars, $ordre, $statut, $d_debut, $d_fin, $iters, $days_iter, $pi);
     } else {
-        $query = "INSERT INTO historique_pi (pi_code, total_pts, build_pts, mco_pts, tra_pts, anomalies_build_pts, apollo_pts, disco_pts, allstars_pts, ordre, statut, date_debut, date_fin, iterations, jours_par_iteration) 
-                  VALUES ('$pi', $total, $build, $mco, $tra, $anomalies, $apollo, $disco, $allstars, $ordre, '$statut', $d_debut, $d_fin, $iters, $days_iter)";
+        $query = 'INSERT INTO historique_pi (total_pts, build_pts, mco_pts, tra_pts, anomalies_build_pts, apollo_pts, disco_pts, allstars_pts, ordre, statut, date_debut, date_fin, iterations, jours_par_iteration, pi_code)
+                  VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)';
+        $params = array($total, $build, $mco, $tra, $anomalies, $apollo, $disco, $allstars, $ordre, $statut, $d_debut, $d_fin, $iters, $days_iter, $pi);
     }
-    if(@pg_query($dbconn, $query)) {
+
+    if (@pg_query_params($dbconn, $query, $params)) {
         echo json_encode(array("status" => "success"));
     } else {
         echo json_encode(array("status" => "error", "message" => pg_last_error($dbconn)));
@@ -74,7 +79,7 @@ if ($result) {
             "build" => (float)$row['build_pts'],
             "mco" => isset($row['mco_pts']) ? (float)$row['mco_pts'] : null,
             "tra" => isset($row['tra_pts']) ? (float)$row['tra_pts'] : null,
-			"anomalies" => isset($row['anomalies_build_pts']) ? (float)$row['anomalies_build_pts'] : null,
+            "anomalies" => isset($row['anomalies_build_pts']) ? (float)$row['anomalies_build_pts'] : null,
             "ordre" => (int)$row['ordre'],
             "statut" => isset($row['statut']) ? $row['statut'] : 'EN COURS',
             "date_debut" => $row['date_debut'],
@@ -90,4 +95,3 @@ if ($result) {
     }
 }
 echo json_encode($historique);
-?>

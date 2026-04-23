@@ -1,12 +1,12 @@
 <?php
-ini_set('display_errors', 0); 
+ini_set('display_errors', 0);
 error_reporting(0);
 header('Content-Type: application/json; charset=utf-8');
-require '../config/db.php';
+require_once '../config/db.php';
 
-if (!isset($dbconn) || !$dbconn) { 
-    echo json_encode(array("status" => "error", "message" => "Connexion BDD perdue.")); 
-    exit; 
+if (!isset($dbconn) || !$dbconn) {
+    echo json_encode(array("status" => "error", "message" => "Connexion BDD perdue."));
+    exit;
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -15,8 +15,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $password = $data['mot_de_passe'];
 
     // On sélectionne exactement ce qu'il y a dans ta capture + id_membre qu'on vient d'ajouter
-    $query = "SELECT id, login, role, equipes_ids, id_membre, mot_de_passe FROM utilisateurs WHERE login = '$login'";
-    $result = @pg_query($dbconn, $query);
+    $query = 'SELECT id, login, role, equipes_ids, id_membre, mot_de_passe FROM utilisateurs WHERE login = $1';
+    $result = @pg_query_params($dbconn, $query, array($login));
 
     if (!$result) {
         $err = pg_last_error($dbconn);
@@ -38,4 +38,3 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         echo json_encode(array("status" => "error", "message" => "Utilisateur introuvable."));
     }
 }
-?>

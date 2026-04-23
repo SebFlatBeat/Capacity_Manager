@@ -1,28 +1,26 @@
 <?php
-// 1. Détection de l'environnement
-$is_local = ($_SERVER['HTTP_HOST'] == 'localhost' || $_SERVER['HTTP_HOST'] == '127.0.0.1' || str_contains($_SERVER['HTTP_HOST'], '192.168.'));
+// 1. Détection de l'environnement (avec prise en compte du port 8000)
+$is_local = (strpos($_SERVER['HTTP_HOST'], 'localhost') !== false || strpos($_SERVER['HTTP_HOST'], '127.0.0.1') !== false || strpos($_SERVER['HTTP_HOST'], '192.168.') !== false);
 
 if ($is_local) {
     // --- CONFIGURATION LOCALE (Ton PC) ---
     $host     = 'localhost';
-    $port     = '5436'; // Ton port spécifique trouvé via PSQLTool
+    $port     = '5436'; // Correction du port à 5436
     $dbname   = 'sebastien.darre';
     $username = 'postgres';
-    $password = 'TON_MOT_DE_PASSE_LOCAL';
+    $pass_db  = 'Sebda2812/1';
 } else {
     // --- CONFIGURATION PROD (Serveur Free.fr) ---
-    // Note : Chez Free, le host est souvent omis ou spécifique
     $host     = '';
     $port     = '5432';
     $dbname   = 'sebastien.darre';
     $username = 'sebastien.darre';
-    $password = 'Sebda2812/1';
+    $pass_db  = 'Sebda2812/1';
 }
 
 // 2. Construction de la chaîne de connexion
-$conn_string = "dbname=$dbname user=$username password=$password";
+$conn_string = "dbname=$dbname user=$username password=$pass_db";
 
-// On ajoute le host et le port seulement s'ils sont définis (important pour la compatibilité Free)
 if (!empty($host)) {
     $conn_string .= " host=$host";
 }
@@ -30,15 +28,11 @@ if (!empty($port)) {
     $conn_string .= " port=$port";
 }
 
-// 3. Tentative de connexion
-$dbconn = pg_connect($conn_string);
+// 3. Tentative de connexion (silencieuse pour attraper l'erreur proprement)
+$dbconn = @pg_connect($conn_string);
 
 if (!$dbconn) {
-    // Petit bonus : message d'erreur plus précis selon l'environnement
-    if ($is_local) {
-        die("Erreur de connexion locale : Vérifiez que PostgreSQL est lancé sur le port $port");
-    } else {
-        die("Erreur de connexion production : Maintenance en cours.");
-    }
+    // On renvoie l'erreur au format JSON pour que React puisse l'afficher sans planter
+    $error_msg = error_get_last() ? error_get_last()['message'] : 'Erreur inconnue';
+    die(json_encode(array("status" => "error", "message" => "Erreur BDD (Port $port) : " . $error_msg)));
 }
-?>

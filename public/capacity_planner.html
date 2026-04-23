@@ -202,7 +202,7 @@
      * 2. UTILS & BUSINESS LOGIC (Dates, Jours fériés, Formats)
      * 3. COMPONENTS ATOMIQUES (UI/UX Reusable components)
      * 4. MODULES FONCTIONNELS (Charts, Settings, Login)
-     * 5. ENGINE : MOTEUR DE CALCUL CAPACITAIRE (Le coeur de l'app)
+     * 5. ENGINE : MOTEUR DE CALCUL CAPACITAIRE (Le cœur de l'app)
      * 6. NAVIGATION & RBAC (Matrice des droits)
      * 7. RENDU DES VUES (Dashboard, Teams, Config)
      * =========================================================================
@@ -229,7 +229,7 @@
             setErrors(newErrors);
             if (hasError) return;
             setIsLoading(true);
-            fetch('api_login.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(credentials) })
+            fetch('../api/api_login.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(credentials) })
             .then(res => res.json()).then(data => {
                 setIsLoading(false);
                 if (data.status === 'success') onLogin(data.user);
@@ -271,9 +271,10 @@
                         
                         <div className="space-y-6">
                             <div className="group">
-                                <label className="block text-[10px] font-black text-[var(--text-muted)] uppercase tracking-[0.2em] mb-2 ml-1">Identity</label>
+                                <label className="block text-[10px] font-black text-[var(--text-muted)] uppercase tracking-[0.2em] mb-2 ml-1" htmlFor="login-input">Identity</label>
                                 <div className="relative">
                                     <input 
+                                        id="login-input"
                                         type="text" autoFocus autoComplete="username" autoCapitalize="none" spellCheck="false"
                                         value={credentials.login} 
                                         onChange={e => setCredentials({...credentials, login: e.target.value})}
@@ -284,9 +285,10 @@
                             </div>
 
                             <div className="group">
-                                <label className="block text-[10px] font-black text-[var(--text-muted)] uppercase tracking-[0.2em] mb-2 ml-1">Credentials</label>
+                                <label className="block text-[10px] font-black text-[var(--text-muted)] uppercase tracking-[0.2em] mb-2 ml-1" htmlFor="password-input">Credentials</label>
                                 <div className="relative">
                                     <input 
+                                        id="password-input"
                                         type={showPassword ? "text" : "password"} autoComplete="current-password"
                                         value={credentials.mot_de_passe} 
                                         onChange={e => setCredentials({...credentials, mot_de_passe: e.target.value})}
@@ -319,9 +321,6 @@
      * 🛠️ BLOC 1 : DONNÉES PAR DÉFAUT & COMPOSANTS VISUELS DE BASE
      * =========================================================================
      */
-	const mockDatabase = {
-		'PI 2026.2': { config: { name: 'PI 2026.2', startDate: '2026-03-30', endDate: '2026-06-26', iterations: 4, daysPerIteration: 15 }, teams: [] }
-	};
 
 	const Card = ({ children, className = "" }) => <div className={`glass-card rounded-2xl bento-item ${className}`}>{children}</div>;
 	
@@ -334,7 +333,7 @@
 		return <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold border ${variants[variant]} ${className}`}>{children}</span>;
 	};
 
-	const Input = ({ className = "", ...props }) => <input className={`flex h-9 w-full rounded-md border border-[var(--glass-border)] dark:border-slate-700 bg-transparent px-3 py-1 text-sm shadow-sm transition-all placeholder:text-[var(--text-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:border-[var(--accent)] focus-visible:ring-offset-1 dark:focus-visible:ring-offset-slate-900 ${className}`} {...props} />;
+	const Input = ({ className = "", id, ...props }) => <input id={id} className={`flex h-9 w-full rounded-md border border-[var(--glass-border)] dark:border-slate-700 bg-transparent px-3 py-1 text-sm shadow-sm transition-all placeholder:text-[var(--text-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:border-[var(--accent)] focus-visible:ring-offset-1 dark:focus-visible:ring-offset-slate-900 ${className}`} {...props} />;
 
 	/**
      * =========================================================================
@@ -357,7 +356,7 @@
 
 		const handleSubmit = (e) => {
 			e.preventDefault();
-			fetch('api_sprints.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(formData) })
+			fetch('../api/api_sprints.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(formData) })
 			.then(res => res.json())
 			.then(response => {
 				if (response.status === 'success') { onShowToast('success', 'Sprint enregistré', 'Le sprint a été ajouté avec succès.'); fetchSprints(); } 
@@ -373,13 +372,10 @@
             const normalize = (str) => String(str || '').replace(/[^0-9.]/g, '');
             const aCode = normalize(activePI);
             
-            const result = sprints.filter(s => {
+            return sprints.filter(s => {
                 const sCode = normalize(s.pi_code);
-                const isMatch = sCode === aCode && aCode !== '';
-                return isMatch;
+                return sCode === aCode && aCode !== '';
             }).sort((a, b) => Number(a.numero_iteration) - Number(b.numero_iteration));
-            
-            return result;
         }, [sprints, activePI]);
 
 		return (
@@ -401,12 +397,12 @@
 					<h3 className="text-lg font-bold text-[var(--text-main)] dark:text-white mb-4">Ajouter un Sprint</h3>
 					<form onSubmit={handleSubmit} className="space-y-4">
 						<div className="grid grid-cols-2 gap-4">
-                            <div><label className="block text-sm font-medium text-[var(--text-muted)] dark:text-slate-300">Code du PI</label><Input type="text" value={formData.pi_code} disabled className="bg-[var(--body-bg)] dark:bg-slate-800 text-[var(--text-muted)] dark:text-[var(--text-muted)]" /></div>
-						    <div><label className="block text-sm font-medium text-[var(--text-muted)] dark:text-slate-300">Numéro Itération</label><Input type="number" min="1" value={formData.numero_iteration} onChange={e => setFormData({...formData, numero_iteration: e.target.value})} required disabled={isArchived} /></div>
+                            <div><label className="block text-sm font-medium text-[var(--text-muted)] dark:text-slate-300" htmlFor="pi-code-input">Code du PI</label><Input id="pi-code-input" type="text" value={formData.pi_code} disabled className="bg-[var(--body-bg)] dark:bg-slate-800 text-[var(--text-muted)] dark:text-[var(--text-muted)]" /></div>
+						    <div><label className="block text-sm font-medium text-[var(--text-muted)] dark:text-slate-300" htmlFor="num-iteration-input">Numéro Itération</label><Input id="num-iteration-input" type="number" min="1" value={formData.numero_iteration} onChange={e => setFormData({...formData, numero_iteration: e.target.value})} required disabled={isArchived} /></div>
                         </div>
 						<div className="grid grid-cols-2 gap-4">
-							<div><label className="block text-sm font-medium text-[var(--text-muted)] dark:text-slate-300">Date de début</label><Input type="date" value={formData.date_debut} onChange={e => setFormData({...formData, date_debut: e.target.value})} required className="cursor-pointer dark:color-scheme-dark" disabled={isArchived} /></div>
-							<div><label className="block text-sm font-medium text-[var(--text-muted)] dark:text-slate-300">Date de fin</label><Input type="date" value={formData.date_fin} onChange={e => setFormData({...formData, date_fin: e.target.value})} required className="cursor-pointer dark:color-scheme-dark" disabled={isArchived} /></div>
+							<div><label className="block text-sm font-medium text-[var(--text-muted)] dark:text-slate-300" htmlFor="date-debut-input">Date de début</label><Input id="date-debut-input" type="date" value={formData.date_debut} onChange={e => setFormData({...formData, date_debut: e.target.value})} required className="cursor-pointer dark:color-scheme-dark" disabled={isArchived} /></div>
+							<div><label className="block text-sm font-medium text-[var(--text-muted)] dark:text-slate-300" htmlFor="date-fin-input">Date de fin</label><Input id="date-fin-input" type="date" value={formData.date_fin} onChange={e => setFormData({...formData, date_fin: e.target.value})} required className="cursor-pointer dark:color-scheme-dark" disabled={isArchived} /></div>
 						</div>
                         
                         <div className="bg-[var(--accent-muted)] dark:bg-[var(--accent)]/30 p-4 rounded-lg border border-[var(--glass-border)] dark:border-[var(--glass-border)] flex items-start gap-3">
@@ -522,12 +518,6 @@
 		return { hex: '#EF4444', textColor: 'text-red-600', msg: 'Le train est en saturation. Charge critique...' };
 	};
 
-	const getEngagementStatus = (val) => {
-        if (val < 60) return { border: 'border-red-600', bg: 'bg-red-50', text: 'text-red-600', darkText: 'text-red-700', icon: 'fa-arrow-trend-down', msg: 'Alerte Prédictibilité : rupture de confiance entre le plan et le livré.' };
-        if (val <= 79 || val > 110) return { border: 'border-amber-500', bg: 'bg-amber-50', text: 'text-amber-600', darkText: 'text-amber-700', icon: 'fa-scale-unbalanced', msg: 'Fiabilité en retrait : écart à analyser entre la planification et la réalité.' };
-        return { border: 'border-emerald-500', bg: 'bg-emerald-50', text: 'text-emerald-600', darkText: 'text-emerald-700', icon: 'fa-bullseye', msg: 'Trajectoire maîtrisée : le train est prédictible et ses promesses sont fiables.' };
-    };
-
     const getRealiseStatus = (val) => {
         if (val < 60) return { border: 'border-red-500', bgIcon: 'bg-red-50', textIcon: 'text-red-600', badgeText: 'text-red-700', badgeBg: 'bg-red-100', msg: 'Déficit de production : la valeur livrée est insuffisante sur cette période.' };
         if (val <= 89) return { border: 'border-amber-500', bgIcon: 'bg-amber-50', textIcon: 'text-amber-600', badgeText: 'text-amber-800', badgeBg: 'bg-amber-100', msg: 'Livraison partielle : une partie de la valeur métier est restée en cours.' };
@@ -565,20 +555,20 @@
                             <div className="w-10 h-10 rounded-xl bg-[var(--accent-muted)] text-[var(--accent)] flex items-center justify-center shadow-sm border border-[var(--glass-border)]">
                                 <i className="fa-solid fa-chart-column"></i>
                             </div>
-                            Performance Metrics <span className="text-sm font-bold text-[var(--text-muted)] tracking-tight ml-2">/ PI History</span>
+                            Métrique de Performance <span className="text-sm font-bold text-[var(--text-muted)] tracking-tight ml-2">/ Historique des PI </span>
                         </h3>
                     </div>
                     <div className="flex bg-[var(--glass-border)]/50 p-1 rounded-xl self-start backdrop-blur-sm border border-[var(--glass-border)]">
-                        <button onClick={() => setView('global')} className={`px-5 py-2 rounded-lg text-xs font-black uppercase tracking-wider transition-all ${view === 'global' ? 'bg-[var(--card-bg)] text-[var(--accent)] shadow-sm scale-[1.02]' : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'}`}>Global View</button>
-                        <button onClick={() => setView('teams')} className={`px-5 py-2 rounded-lg text-xs font-black uppercase tracking-wider transition-all ${view === 'teams' ? 'bg-[var(--card-bg)] text-[var(--accent)] shadow-sm scale-[1.02]' : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'}`}>Team View</button>
+                        <button onClick={() => setView('global')} className={`px-5 py-2 rounded-lg text-xs font-black uppercase tracking-wider transition-all ${view === 'global' ? 'bg-[var(--card-bg)] text-[var(--accent)] shadow-sm scale-[1.02]' : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'}`}>Vue Globale</button>
+                        <button onClick={() => setView('teams')} className={`px-5 py-2 rounded-lg text-xs font-black uppercase tracking-wider transition-all ${view === 'teams' ? 'bg-[var(--card-bg)] text-[var(--accent)] shadow-sm scale-[1.02]' : 'text-[var(--text-muted)] hover:text-[var(--text-main)]'}`}>Par Équipe</button>
                     </div>
                 </div>
 
                 <div className="flex flex-wrap gap-2.5 mb-8 border-b border-[var(--glass-border)] pb-6">
                     {view === 'global' ? (
-                        <React.Fragment>
+                        <>
                             <button onClick={() => toggleGlobal('total')} className={`flex items-center gap-2 px-3.5 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all border ${showGlobal.total ? 'bg-[var(--card-bg)] text-[var(--text-main)] border-[var(--glass-border)] shadow-sm' : 'opacity-40 border-transparent'}`}>
-                                <div className="w-2.5 h-2.5 rounded-full bg-[var(--glass-border)] border border-slate-400" style={patternStyle}></div> Capacity
+                                <div className="w-2.5 h-2.5 rounded-full bg-[var(--glass-border)] border border-slate-400" style={patternStyle}></div> Capacité
                             </button>
                             <button onClick={() => toggleGlobal('build')} className={`flex items-center gap-2 px-3.5 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all border ${showGlobal.build ? 'bg-[var(--accent)] text-white border-[var(--accent)] shadow-md shadow-[var(--accent)]/10' : 'opacity-40 border-transparent'}`}>
                                 <div className="w-2.5 h-2.5 rounded-full bg-[var(--accent)] shadow-[0_0_8px_rgba(59,130,246,0.8)]"></div> Build
@@ -592,9 +582,9 @@
                             <button onClick={() => toggleGlobal('anomalies')} className={`flex items-center gap-2 px-3.5 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all border ${showGlobal.anomalies ? 'bg-red-500 text-white border-red-600 shadow-md shadow-red-100' : 'opacity-40 border-transparent'}`}>
                                 <div className="w-2.5 h-2.5 rounded-full bg-red-200 shadow-[0_0_8px_rgba(239,68,68,0.8)]"></div> Anomalies
                             </button>
-                        </React.Fragment>
+                        </>
                     ) : (
-                        <React.Fragment>
+                        <>
                             {Object.keys(TEAM_THEMES).map(teamKey => {
                                 const theme = TEAM_THEMES[teamKey];
                                 const isActive = showTeams[teamKey];
@@ -604,7 +594,7 @@
                                     </button>
                                 );
                             })}
-                        </React.Fragment>
+                        </>
                     )}
                 </div>
 
@@ -619,7 +609,7 @@
 
                     <div className="relative h-full flex items-stretch justify-around z-10 pt-4 pb-2 gap-4">
                         {data.length === 0 ? (
-                            <div className="text-sm font-bold text-[var(--text-muted)] italic self-center">No historical data available...</div>
+                            <div className="text-sm font-bold text-[var(--text-muted)] italic self-center">Pas de données historique disponible...</div>
                         ) : (
                                 data.map((item, idx) => {
                                 return (
@@ -632,11 +622,11 @@
                                                 <div className="space-y-2.5">
                                                     {view === 'global' ? (
                                                         <>
-                                                            {showGlobal.total && <div className="flex justify-between items-center text-[10px] font-bold"><span className="text-[var(--text-muted)]">Capacity</span><span className="text-[var(--text-main)] bg-[var(--accent-muted)] px-2 py-0.5 rounded-md num-align">{item.total}</span></div>}
+                                                            {showGlobal.total && <div className="flex justify-between items-center text-[10px] font-bold"><span className="text-[var(--text-muted)]">Capacité</span><span className="text-[var(--text-main)] bg-[var(--accent-muted)] px-2 py-0.5 rounded-md num-align">{item.total}</span></div>}
                                                             {showGlobal.build && <div className="flex justify-between items-center text-[10px] font-black text-[var(--accent)]"><span>Build</span><span className="bg-[var(--accent-muted)] px-2 py-0.5 rounded-md num-align">{item.build}</span></div>}
                                                             {showGlobal.mco && item.mco && <div className="flex justify-between items-center text-[10px] font-black text-purple-600"><span>MCO</span><span className="bg-purple-50 px-2 py-0.5 rounded-md num-align">{item.mco}</span></div>}
                                                             {showGlobal.tra && item.tra && <div className="flex justify-between items-center text-[10px] font-black text-amber-600"><span>TRA</span><span className="bg-amber-50 px-2 py-0.5 rounded-md num-align">{item.tra}</span></div>}
-                                                            {showGlobal.anomalies && item.anomalies && <div className="flex justify-between items-center text-[10px] font-black text-red-600"><span>Bugs</span><span className="bg-red-50 px-2 py-0.5 rounded-md num-align">{item.anomalies}</span></div>}
+                                                            {showGlobal.anomalies && item.anomalies && <div className="flex justify-between items-center text-[10px] font-black text-red-600"><span>Anomalies</span><span className="bg-red-50 px-2 py-0.5 rounded-md num-align">{item.anomalies}</span></div>}
                                                         </>
                                                     ) : (
                                                         Object.keys(TEAM_THEMES).map(teamKey => {
@@ -658,7 +648,7 @@
 
                                             <div className="absolute bottom-0 left-0 w-full h-full flex flex-col justify-end px-1.5 pb-1">
                                                 {view === 'global' ? (
-                                                    <React.Fragment>
+                                                    <>
                                                         {showGlobal.total && (
                                                             <div className="absolute bottom-0 left-1.5 right-1.5 bg-[var(--glass-border)]/40 border border-[var(--glass-border)] border-b-0 rounded-t-lg transition-all duration-700" style={{ height: `${Math.min((item.total / maxScale) * 100, 100)}%`, ...patternStyle }}></div>
                                                         )}
@@ -666,13 +656,13 @@
                                                         {showGlobal.tra && <div className="w-full bg-amber-500 chart-bar rounded-t-md z-10" style={{ height: `${((item.tra || 0) / maxScale) * 100}%` }}></div>}
                                                         {showGlobal.mco && <div className="w-full bg-purple-600 chart-bar rounded-t-md z-10" style={{ height: `${((item.mco || 0) / maxScale) * 100}%` }}></div>}
                                                         {showGlobal.build && <div className="w-full bg-[var(--accent)] chart-bar rounded-t-md z-10" style={{ height: `${(item.build / maxScale) * 100}%` }}></div>}
-                                                    </React.Fragment>
+                                                    </>
                                                 ) : (                                                
-                                                    <React.Fragment>
+                                                    <>
                                                         {showTeams.allstars && item.teams?.allstars != null && <div className={`w-full ${TEAM_THEMES.allstars.bg} chart-bar rounded-t-md shadow-inner`} style={{ height: `${(item.teams.allstars / maxScale) * 100}%` }}></div>}
                                                         {showTeams.disco && item.teams?.disco != null && <div className={`w-full ${TEAM_THEMES.disco.bg} chart-bar rounded-t-md shadow-inner`} style={{ height: `${(item.teams.disco / maxScale) * 100}%` }}></div>}
                                                         {showTeams.apollo && item.teams?.apollo != null && <div className={`w-full ${TEAM_THEMES.apollo.bg} chart-bar rounded-t-md shadow-inner`} style={{ height: `${(item.teams.apollo / maxScale) * 100}%` }}></div>}
-                                                    </React.Fragment>
+                                                    </>
                                                 )}
                                             </div>
                                         </div>
@@ -707,7 +697,7 @@
 				const isHoliday = holidaysList.some(h => {
 					if (h.date !== dateStr) return false;
 					if (h.country === 'Tous') return true; // Commun (Monde)
-					if (h.country === mCountry) return true; // Match exact (ex: France, Esp Valence)
+					if (h.country === mCountry) return true; // Match exact (ex : France, Esp Valence)
 					// L'astuce pour l'Espagne globale :
 					if (h.country === 'Espagne' && mCountry.toLowerCase().includes('esp')) return true;
 					return false;
@@ -805,7 +795,7 @@
 		 * ---------------------------------------------------------------------
 		 */
 		useEffect(() => {
-			fetch('api_historique.php?t=' + new Date().getTime())
+			fetch('../api/api_historique.php?t=' + new Date().getTime())
 				.then(res => res.text())
 				.then(text => {
 					try {
@@ -814,13 +804,12 @@
 						if (Array.isArray(data)) setHistoricalData(data);
 					} catch (e) { console.error("Erreur parsing historique", e); }
 				})
-				.catch(err => console.error("Erreur réseau historique"));
+				.catch(err => console.error("Erreur réseau historique", err));
 		}, []); 
 
 		// Permissions RBAC (Role-Based Access Control)
 		const isAppAdmin = user?.role === 'ADMIN';
 		const isTeamAdmin = useCallback((teamDbId) => { return isAppAdmin || (user?.role === 'SM' && user?.equipes_ids?.includes(Number(teamDbId))); }, [user, isAppAdmin]);
-		const isTeamContributor = useCallback((teamDbId) => { return isTeamAdmin(teamDbId) || (user?.role === 'CONTRIBUTEUR' && user?.equipes_ids?.includes(Number(teamDbId))); }, [user, isTeamAdmin]);
 
 		const safeNum = useCallback((val, fallback = 0) => {
 			if (val === undefined || val === null || val === '') return fallback;
@@ -841,19 +830,21 @@
 
         // Récupération dynamique de la liste des PIs et de l'historique (Source de vérité unique)
         const fetchPIs = useCallback(() => {
-            fetch('api_historique.php?t=' + new Date().getTime())
+            fetch('../api/api_historique.php?t=' + new Date().getTime())
                 .then(res => res.text())
                 .then(text => {
                     try {
                         const cleanText = text.trim().replace(/^\uFEFF/, '');
                         const data = JSON.parse(cleanText);
                         if (Array.isArray(data)) {
-                            setPiList(data);
+                            // On trie la liste des PIs de sorte que le plus récent (dernier créé) apparaisse en premier.
+                            const sortedData = [...data].reverse();
+                            setPiList(sortedData);
                             setHistoricalData(data); // On synchronise les deux
                             
                             const savedPI = localStorage.getItem('capPlanner_activePI');
-                            if (!savedPI && data.length > 0) {
-                                const lastPI = data[data.length - 1].pi;
+                            if (!savedPI && sortedData.length > 0) {
+                                const lastPI = sortedData[0].pi; // Le premier élément est maintenant le plus récent
                                 setActivePI(lastPI);
                                 localStorage.setItem('capPlanner_activePI', lastPI);
                             }
@@ -893,7 +884,7 @@
                 }
             };
 
-            fetch('api_historique.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
+            fetch('../api/api_historique.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
             .then(res => res.json())
             .then(data => {
                 if (data.status === 'success') {
@@ -924,7 +915,7 @@
                 }
             };
 
-            fetch('api_historique.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
+            fetch('../api/api_historique.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
             .then(res => res.json())
             .then(data => {
                 if (data.status === 'success') {
@@ -976,7 +967,7 @@
                 }
             };
 
-            fetch('api_historique.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
+            fetch('../api/api_historique.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
             .then(res => res.json())
             .then(data => {
                 if (data.status === 'success') {
@@ -994,7 +985,7 @@
 		const [holidayToDelete, setHolidayToDelete] = useState(null);
 
 		const fetchHolidays = useCallback(() => {
-			fetch('api_feries.php').then(res => res.json()).then(data => { if(Array.isArray(data)) setHolidays(data); }).catch(err => console.error(err));
+			fetch('../api/api_feries.php').then(res => res.json()).then(data => { if(Array.isArray(data)) setHolidays(data); }).catch(err => console.error(err));
 		}, []);
 		useEffect(() => { fetchHolidays(); }, [fetchHolidays]);
 
@@ -1002,7 +993,7 @@
 			e.preventDefault();
 			if (!newHoliday.date || !newHoliday.name) return;
 			const payload = { id: editingHolidayId, date: newHoliday.date, name: newHoliday.name, id_pays: newHoliday.id_pays };
-			fetch('api_feries.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
+			fetch('../api/api_feries.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
 			.then(res => res.json()).then(data => {
 				if (data.status === 'success') {
 					fetchHolidays(); setNewHoliday({ date: '', id_pays: 0, country: 'Tous', name: '' }); setEditingHolidayId(null);
@@ -1013,7 +1004,7 @@
 
 		const confirmDeleteHoliday = () => {
 			if(!holidayToDelete) return;
-			fetch('api_feries.php', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: holidayToDelete.id }) })
+			fetch('../api/api_feries.php', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: holidayToDelete.id }) })
 			.then(() => { fetchHolidays(); setHolidayToDelete(null); showToast('success', 'Suppression réussie', 'Le jour férié a été retiré.'); });
 		};
 
@@ -1029,9 +1020,9 @@
 				const cleanName = newPIName.trim();
                 const existing = piList.find(p => p.pi === cleanName);
 				if (!existing) { 
-                    // On initialise le PI dans l'historique BDD avec des valeurs par défaut (0)
+                    // On initialise le PI dans l'historique BDD avec des valeurs par défaut (0).
                     const payload = { pi: cleanName, total: 0, build: 0, ordre: piList.length + 1, statut: 'PLANNING', teams: { apollo: 0, disco: 0, allstars: 0 } };
-                    fetch('api_historique.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
+                    fetch('../api/api_historique.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
                         .then(res => res.json())
                         .then(data => {
                             if (data.status === 'success') {
@@ -1051,7 +1042,7 @@
 		};
 
 		const fetchSprints = useCallback(() => { 
-            fetch('api_sprints.php?pi_code=' + encodeURIComponent(activePI) + '&t=' + new Date().getTime())
+            fetch('../api/api_sprints.php?pi_code=' + encodeURIComponent(activePI) + '&t=' + new Date().getTime())
                 .then(res => res.text())
                 .then(text => {
                     try {
@@ -1065,7 +1056,7 @@
 		useEffect(() => { fetchSprints(); }, [fetchSprints]);
 
 		const loadTeamsFromDB = useCallback(() => {
-			fetch(`api_equipes.php?pi_code=${encodeURIComponent(activePI)}&t=${new Date().getTime()}`)
+			fetch(`../api/api_equipes.php?pi_code=${encodeURIComponent(activePI)}&t=${new Date().getTime()}`)
 				.then(res => res.text())
 				.then(text => {
                     try { 
@@ -1097,7 +1088,7 @@
 		 * ---------------------------------------------------------------------
 		 */
 		const saveSprintDataToDB = (db_id, iter, conges, mco) => {
-			fetch('api_equipes.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'update_sprint_data', id_membre: db_id, pi_code: activePI, numero_iteration: iter, jours_conges: conges, jours_mco: mco }) })
+			fetch('../api/api_equipes.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'update_sprint_data', id_membre: db_id, pi_code: activePI, numero_iteration: iter, jours_conges: conges, jours_mco: mco }) })
 			.then(res => res.json()).then(data => { if (data.status === 'error') showToast('error', 'Erreur BDD', 'Échec de la sauvegarde des congés.'); }).catch(err => console.error(err));
 		};
 
@@ -1114,13 +1105,13 @@
             const newVal = isCurrentlyAssigned ? 0 : 1;
             handleSprintDataChange(teamId, memberLocalId, sprint.numero_iteration, 'mco', newVal);
 
-            fetch('api_mco.php', { method: newVal === 1 ? 'POST' : 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id_membre: memberDbId, id_sprint: finalSprintId }) })
+            fetch('../api/api_mco.php', { method: newVal === 1 ? 'POST' : 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id_membre: memberDbId, id_sprint: finalSprintId }) })
             .then(res => res.json()).then(data => {
                 if (data.status !== 'success' && data.status !== 'deleted') {
                     handleSprintDataChange(teamId, memberLocalId, sprint.numero_iteration, 'mco', isCurrentlyAssigned ? 1 : 0);
                     showToast('error', 'Erreur BDD', data.message || "L'affectation a été refusée.");
                 }
-            }).catch(err => { handleSprintDataChange(teamId, memberLocalId, sprint.numero_iteration, 'mco', isCurrentlyAssigned ? 1 : 0); showToast('error', 'Erreur Réseau', 'Impossible de sauvegarder la MCO.'); });
+            }).catch(err => { console.error(err); handleSprintDataChange(teamId, memberLocalId, sprint.numero_iteration, 'mco', isCurrentlyAssigned ? 1 : 0); showToast('error', 'Erreur Réseau', 'Impossible de sauvegarder la MCO.'); });
         };
 			
         const toggleTraAssignment = (teamId, memberDbId, memberLocalId, sprint, isCurrentlyAssigned) => {
@@ -1129,13 +1120,13 @@
 			const newVal = isCurrentlyAssigned ? 0 : 1; // 1 semaine par défaut
             handleSprintDataChange(teamId, memberLocalId, sprint.numero_iteration, 'tra', newVal);
 
-			fetch('api_tra.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id_membre: memberDbId, id_sprint: finalSprintId, nb_semaines: newVal }) })
+			fetch('../api/api_tra.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id_membre: memberDbId, id_sprint: finalSprintId, nb_semaines: newVal }) })
             .then(res => res.json()).then(data => {
                 if (data.status !== 'success') {
                     handleSprintDataChange(teamId, memberLocalId, sprint.numero_iteration, 'tra', isCurrentlyAssigned ? 3 : 0);
                     showToast('error', 'Erreur BDD', data.message || "L'affectation TRA a été refusée.");
                 }
-            }).catch(err => { handleSprintDataChange(teamId, memberLocalId, sprint.numero_iteration, 'tra', isCurrentlyAssigned ? 3 : 0); showToast('error', 'Erreur Réseau', 'Impossible de sauvegarder la TRA.'); });
+            }).catch(err => { console.error(err); handleSprintDataChange(teamId, memberLocalId, sprint.numero_iteration, 'tra', isCurrentlyAssigned ? 3 : 0); showToast('error', 'Erreur Réseau', 'Impossible de sauvegarder la TRA.'); });
 		};
 
 		const handleDeleteDbMember = (db_id, nom) => { 
@@ -1144,7 +1135,7 @@
 
 		const confirmDeleteMember = () => {
 			if (!memberToDelete) return;
-			fetch('api_equipes.php', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id_membre: memberToDelete.id }) })
+			fetch('../api/api_equipes.php', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id_membre: memberToDelete.id }) })
 			.then(res => res.json()).then(res => { 
 				if(res.status === 'success') { 
 					loadTeamsFromDB(); 
@@ -1160,20 +1151,20 @@
 		const handleTeamRealiseChange = (teamId, value) => { setTeams(prev => prev.map(t => t.id === teamId ? { ...t, realise: safeNum(value, 0) } : t)); };
 		
         const saveTeamMetricsToDB = (teamDbId, charge, realise, velocity) => {
-			fetch('api_equipes.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'update_team_metrics', id_equipe: teamDbId, pi_code: activePI, charge_engagee: charge, realise: realise, velocity: velocity }) })
+			fetch('../api/api_equipes.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'update_team_metrics', id_equipe: teamDbId, pi_code: activePI, charge_engagee: charge, realise: realise, velocity: velocity }) })
 			.then(res => res.json()).then(data => { if (data.status !== 'success') showToast('error', 'Erreur de sauvegarde', 'Impossible d\'enregistrer les métriques de l\'équipe.'); }).catch(err => console.error(err));
 		};
 
 		const saveTraToDB = (id_membre, id_sprint, nb_semaines) => {
             if (!id_sprint) return; 
-			fetch('api_tra.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id_membre, id_sprint, nb_semaines: safeNum(nb_semaines, 0) }) })
-			.catch(err => showToast('error', 'Erreur réseau', 'Impossible de sauvegarder la TRA.'));
+			fetch('../api/api_tra.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id_membre, id_sprint, nb_semaines: safeNum(nb_semaines, 0) }) })
+			.catch(err => { console.error(err); showToast('error', 'Erreur réseau', 'Impossible de sauvegarder la TRA.'); });
 		};
 
 		const handleVelocityFactorChange = (teamId, value) => { setTeams(prev => prev.map(t => t.id === teamId ? { ...t, velocityFactor: safeNum(value, 0.46) } : t)); };
 		
         const submitAddMember = (team_db_id) => { 
-			fetch('api_equipes.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'add_member', id_equipe: team_db_id, id_pays: newMember.id_pays, nom: newMember.nom, role: newMember.role }) })
+			fetch('../api/api_equipes.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'add_member', id_equipe: team_db_id, id_pays: newMember.id_pays, nom: newMember.nom, role: newMember.role }) })
 			.then(() => { setAddingToTeam(null); setNewMember({ nom: '', role: 'Dev', id_pays: 1 }); loadTeamsFromDB(); showToast('success', 'Membre ajouté', 'Le collaborateur a rejoint l\'équipe.'); }); 
 		};
 
@@ -1264,7 +1255,7 @@
 		 * 5. CALCULS GLOBAUX (LINÉARITÉ & DASHBOARD)
 		 * ---------------------------------------------------------------------
 		 */
-		const { pctTime, isInitialPhase, daysElapsed } = useMemo(() => {
+		const { pctTime, isInitialPhase } = useMemo(() => {
             // On utilise les dates de piConfig (définies globalement) ou le fallback sur les sprints
             const startDate = piConfig.startDate ? new Date(piConfig.startDate) : (currentPiSprints[0]?.date_debut ? new Date(currentPiSprints[0].date_debut) : null);
             const endDate = piConfig.endDate ? new Date(piConfig.endDate) : (currentPiSprints[currentPiSprints.length - 1]?.date_fin ? new Date(currentPiSprints[currentPiSprints.length - 1].date_fin) : null);
@@ -1288,7 +1279,7 @@
 			const totalMcoCap = computedTeams.reduce((sum, t) => sum + safeNum(t.totalMcoCapacity, 0), 0);
             const totalTraCap = computedTeams.reduce((sum, t) => sum + safeNum(t.totalTraCapacity, 0), 0);
             
-            // La capacité brute est la somme de tout ce que le train peut produire (Build + MCO + TRA)
+            // La capacité brute est la somme de tout ce que le train peut produire (Build + MCO + TRA).
 			const totalGrossCap = totalNetCap + totalMcoCap + totalTraCap;
 
 			const totalLoadBuild = computedTeams.reduce((sum, t) => sum + safeNum(t.committedLoad, 0), 0);
@@ -1338,7 +1329,7 @@
 							<div className="flex items-start justify-between">
 								<div>
 									<p className="text-sm font-semibold text-[var(--text-muted)] uppercase tracking-tight">Capacité Nette (Build)</p>
-                                    {/* 🛠️ UX : Contraste "pts" augmenté (slate-600 font-semibold) */}
+                                    {/* 🛠️ UX : Contraste "pts" augmenté (slate-600 font semibold) */}
 									<h3 className="text-3xl font-bold text-[var(--text-main)] mt-3">{Number(globalStats.totalNetCap)} <span className="text-xl text-[var(--text-muted)] font-semibold">pts</span></h3>
 								</div>
 								<div className="p-3 rounded-xl bg-[var(--accent-muted)] text-[var(--accent)] shrink-0 ml-4"><i className="fa-solid fa-bolt text-xl"></i></div>
@@ -1412,8 +1403,10 @@
 									<p className="text-sm font-semibold text-[var(--text-muted)] uppercase tracking-widest">ANO (Bugs Build)</p>
 								</div>
 								<div className="flex items-baseline gap-1 mt-1">
-									<input 
-										type="number" min="0" step="0.5" value={currentAnomalies} 
+									<label htmlFor="ano-input" className="sr-only">Anomalies</label>
+									<input
+										id="ano-input"
+										type="number" min="0" step="0.5" value={currentAnomalies}
 										onChange={(e) => setCurrentAnomalies(e.target.value)} 
 										disabled={!isAppAdmin && user?.role !== 'SM'}
 										className="w-20 bg-transparent border-b-2 border-red-200 focus:border-red-500 outline-none text-3xl font-bold text-red-900 transition-colors disabled:opacity-80"
@@ -1670,12 +1663,12 @@
                         <Card className="p-4 border-2 border-[var(--accent)] bg-[var(--accent-muted)]/30 animate-in slide-in-from-top-4 mt-2">
                             <div className="flex flex-wrap items-center gap-4">
                                 <div className="flex-1 min-w-[200px]">
-                                    <label className="text-[10px] font-black text-[var(--text-main)] uppercase ml-1">Nom du collaborateur</label>
-                                    <Input placeholder="ex: TIM" value={newMember.nom} onChange={e => setNewMember({...newMember, nom: e.target.value})} className="bg-[var(--card-bg)] font-bold" autoFocus />
+                                    <label className="text-[10px] font-black text-[var(--text-main)] uppercase ml-1" htmlFor="collab-name-input">Nom du collaborateur</label>
+                                    <Input id="collab-name-input" placeholder="ex: TIM" value={newMember.nom} onChange={e => setNewMember({...newMember, nom: e.target.value})} className="bg-[var(--card-bg)] font-bold" autoFocus />
                                 </div>
                                 <div>
-                                    <label className="text-[10px] font-black text-[var(--text-main)] uppercase ml-1">Équipe cible</label>
-                                    <select className="w-full h-9 rounded-md border border-[var(--glass-border)] text-sm px-3 font-bold bg-[var(--card-bg)] outline-none focus:ring-2 focus:ring-[var(--accent)]" value={newMember.id_equipe} onChange={e => setNewMember({...newMember, id_equipe: e.target.value})}>
+                                    <label className="text-[10px] font-black text-[var(--text-main)] uppercase ml-1" htmlFor="collab-team-select">Équipe cible</label>
+                                    <select id="collab-team-select" className="w-full h-9 rounded-md border border-[var(--glass-border)] text-sm px-3 font-bold bg-[var(--card-bg)] outline-none focus:ring-2 focus:ring-[var(--accent)]" value={newMember.id_equipe} onChange={e => setNewMember({...newMember, id_equipe: e.target.value})}>
                                         <option value="">Choisir...</option>
                                         {teams.filter(t => isAppAdmin || user?.equipes_ids?.includes(Number(t.db_id))).length > 1 && (
                                             <option value={teams.filter(t => isAppAdmin || user?.equipes_ids?.includes(Number(t.db_id))).map(t => t.db_id).join(',')} className="font-black text-[var(--accent)] bg-[var(--accent-muted)]">
@@ -1689,15 +1682,15 @@
                                     </select>
                                 </div>
                                 <div>
-                                    <label className="text-[10px] font-black text-[var(--text-main)] uppercase ml-1">Rôle</label>
-                                    <select className="w-full h-9 rounded-md border border-[var(--glass-border)] text-sm px-3 font-bold bg-[var(--card-bg)]" value={newMember.role} onChange={e => setNewMember({...newMember, role: e.target.value})}>
+                                    <label className="text-[10px] font-black text-[var(--text-main)] uppercase ml-1" htmlFor="collab-role-select">Rôle</label>
+                                    <select id="collab-role-select" className="w-full h-9 rounded-md border border-[var(--glass-border)] text-sm px-3 font-bold bg-[var(--card-bg)]" value={newMember.role} onChange={e => setNewMember({...newMember, role: e.target.value})}>
                                         <option>Dev</option><option>PO</option><option>PPO</option><option>SM</option><option>RT</option>
                                     </select>
                                 </div>
 
                                 <div>
-                                    <label className="text-[10px] font-black text-[var(--text-main)] uppercase ml-1">Pays</label>
-                                    <select className="w-full h-9 rounded-md border border-[var(--glass-border)] text-sm px-3 font-bold bg-[var(--card-bg)]" value={newMember.id_pays} onChange={e => setNewMember({...newMember, id_pays: Number(e.target.value)})}>
+                                    <label className="text-[10px] font-black text-[var(--text-main)] uppercase ml-1" htmlFor="collab-country-select">Pays</label>
+                                    <select id="collab-country-select" className="w-full h-9 rounded-md border border-[var(--glass-border)] text-sm px-3 font-bold bg-[var(--card-bg)]" value={newMember.id_pays} onChange={e => setNewMember({...newMember, id_pays: Number(e.target.value)})}>
                                         <option value={1}>France</option><option value={2}>Valence</option><option value={3}>Murcie</option>
                                     </select>
                                 </div>
@@ -1794,7 +1787,9 @@
                                                                     <div className="flex flex-col items-center justify-center gap-2">
                                                                         <div className="flex flex-col items-center gap-1.5">
                                                                             <div className="flex items-center gap-1">
-                                                                                <input 
+                                                                                <label htmlFor={`tra-input-${m.id}-${iter}`} className="sr-only">Semaines TRA</label>
+                                                                                <input
+                                                                                    id={`tra-input-${m.id}-${iter}`}
                                                                                     type="number" step="0.5" min="0" max="3"
                                                                                     value={rawTra}
                                                                                     disabled={!canEditThisMember}
@@ -2104,7 +2099,9 @@
                                                                     <div className="flex flex-col items-center justify-center gap-2 h-full w-full">
                                                                                                                                                
                                                                         <div className="grid grid-cols-3 gap-2 items-center w-full justify-items-center px-1">
-                                                                            <input 
+                                                                            <label htmlFor={`abs-input-${team.id}-${m.id}-${iter}`} className="sr-only">Absences</label>
+                                                                            <input
+                                                                                id={`abs-input-${team.id}-${m.id}-${iter}`}
                                                                                 type="number" step="0.5" min="0" value={rawAbs} disabled={disableAbs} title="Absences"
                                                                                 onChange={(e) => { if (!e.target.value.includes('-')) handleSprintDataChange(team.id, m.id, iter, 'absences', e.target.value); }} 
                                                                                 onBlur={(e) => { const finalVal = Math.max(0, Number(e.target.value) || 0); handleSprintDataChange(team.id, m.id, iter, 'absences', finalVal); saveSprintDataToDB(m.db_id, iter, finalVal, Number(m.mco?.[iter] || 0)); }} 
@@ -2209,7 +2206,7 @@
                     }
 				};
 
-				fetch('api_historique.php', { 
+				fetch('../api/api_historique.php', {
                     method: 'POST', 
                     headers: { 'Content-Type': 'application/json' }, 
                     body: JSON.stringify(payload) 
@@ -2217,7 +2214,7 @@
 				.then(res => res.json())
 				.then(data => {
 					if(data.status === 'success') {
-						fetch('api_historique.php?t=' + new Date().getTime()).then(r => r.json()).then(setHistoricalData);
+						fetch('../api/api_historique.php?t=' + new Date().getTime()).then(r => r.json()).then(setHistoricalData);
 						setNewHist({ pi: '', total: '', build: '', mco: '', tra: '', anomalies: '', apollo: '', disco: '', allstars: '', ordre: '' });
 						showToast('success', 'Succès', 'Historique mis à jour avec succès !');
 					} else {
@@ -2235,8 +2232,8 @@
 
             const confirmDeleteHistory = () => {
                 if (!historyToDelete) return;
-                fetch(`api_historique.php?pi=${historyToDelete}`, { method: 'DELETE' }).then(() => {
-					fetch('api_historique.php?t=' + new Date().getTime()).then(r => r.json()).then(setHistoricalData); 
+                fetch(`../api/api_historique.php?pi=${historyToDelete}`, { method: 'DELETE' }).then(() => {
+					fetch('../api/api_historique.php?t=' + new Date().getTime()).then(r => r.json()).then(setHistoricalData);
                     showToast('success', 'Suppression réussie', `L'historique du ${historyToDelete} a été effacé.`);
                     setHistoryToDelete(null);
 				}).catch(err => {
@@ -2252,8 +2249,8 @@
                     <Card className="p-6 bg-[var(--accent-muted)]/50 border-[var(--glass-border)] shadow-sm">
 						<div className="flex flex-col md:flex-row items-end gap-4">
 							<div className="flex-1 w-full">
-								<label className="block text-sm font-bold text-[var(--text-main)] mb-1">Créer un nouveau Program Increment (Actif)</label>
-								<Input placeholder="Ex: PI 2026.3" value={newPiNameInput} onChange={e => setNewPiNameInput(e.target.value)} className="bg-[var(--card-bg)]" />
+								<label className="block text-sm font-bold text-[var(--text-main)] mb-1" htmlFor="new-pi-input">Créer un nouveau Program Increment (Actif)</label>
+								<Input id="new-pi-input" placeholder="Ex: PI 2026.3" value={newPiNameInput} onChange={e => setNewPiNameInput(e.target.value)} className="bg-[var(--card-bg)]" />
 							</div>
 							<button onClick={() => handleCreatePI(newPiNameInput)} className="w-full md:w-auto bg-[var(--accent)] hover:bg-[var(--accent)] text-white font-bold py-1.5 px-6 rounded-md h-9 shadow-sm transition-colors">
                                 <i className="fa-solid fa-plus mr-2"></i>Créer ce PI
@@ -2273,23 +2270,23 @@
                             <div className="space-y-6">
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
-                                        <label className="block text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider mb-1">Date de début</label>
-                                        <Input type="date" value={piConfig.startDate || ''} onChange={(e) => setPiConfig({...piConfig, startDate: e.target.value})} className="font-bold text-[var(--text-muted)] cursor-pointer" />
+                                        <label className="block text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider mb-1" htmlFor="pi-start-date">Date de début</label>
+                                        <Input id="pi-start-date" type="date" value={piConfig.startDate || ''} onChange={(e) => setPiConfig({...piConfig, startDate: e.target.value})} className="font-bold text-[var(--text-muted)] cursor-pointer" />
                                     </div>
                                     <div>
-                                        <label className="block text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider mb-1">Date de fin</label>
-                                        <Input type="date" value={piConfig.endDate || ''} onChange={(e) => setPiConfig({...piConfig, endDate: e.target.value})} className="font-bold text-[var(--text-muted)] cursor-pointer" />
+                                        <label className="block text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider mb-1" htmlFor="pi-end-date">Date de fin</label>
+                                        <Input id="pi-end-date" type="date" value={piConfig.endDate || ''} onChange={(e) => setPiConfig({...piConfig, endDate: e.target.value})} className="font-bold text-[var(--text-muted)] cursor-pointer" />
                                     </div>
                                 </div>
 
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
-                                        <label className="block text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider mb-1">Nombre d'itérations</label>
-                                        <Input type="number" value={Number(piConfig.iterations || 4)} onChange={(e) => setPiConfig({...piConfig, iterations: Number(e.target.value)})} className="font-bold text-[var(--text-muted)]" />
+                                        <label className="block text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider mb-1" htmlFor="pi-iterations">Nombre d'itérations</label>
+                                        <Input id="pi-iterations" type="number" value={Number(piConfig.iterations || 4)} onChange={(e) => setPiConfig({...piConfig, iterations: Number(e.target.value)})} className="font-bold text-[var(--text-muted)]" />
                                     </div>
                                     <div>
-                                        <label className="block text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider mb-1">Jours / itération</label>
-                                        <Input type="number" value={Number(piConfig.daysPerIteration || 15)} onChange={(e) => setPiConfig({...piConfig, daysPerIteration: Number(e.target.value)})} className="font-bold text-[var(--text-muted)]" />
+                                        <label className="block text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider mb-1" htmlFor="pi-days-per-iteration">Jours / itération</label>
+                                        <Input id="pi-days-per-iteration" type="number" value={Number(piConfig.daysPerIteration || 15)} onChange={(e) => setPiConfig({...piConfig, daysPerIteration: Number(e.target.value)})} className="font-bold text-[var(--text-muted)]" />
                                     </div>
                                 </div>
 
@@ -2306,11 +2303,12 @@
 									<div className="space-y-3">
 										{teams.map(team => (
 											<div key={team.id} className="flex justify-between items-center py-2 border-b border-[var(--glass-border)]/60 last:border-0">
-												<span className="text-sm font-bold text-[var(--text-muted)]">{String(team.name)}</span>
+												<label className="text-sm font-bold text-[var(--text-muted)]" htmlFor={`velocity-${team.id}`}>{String(team.name)}</label>
 												
 												<div className="flex flex-col items-end">
 													<Input 
-														type="number" step="0.01" inputMode="decimal" 
+														id={`velocity-${team.id}`}
+                                                        type="number" step="0.01" inputMode="decimal"
                                                         className="w-24 text-right font-black text-[var(--accent)] bg-[var(--card-bg)] shadow-inner" 
 														value={Number(team.velocityFactor || 0.46)} 
 														onChange={(e) => handleVelocityFactorChange(team.id, e.target.value)} 
@@ -2359,20 +2357,20 @@
 							<form onSubmit={handleAddHoliday} className="flex flex-col gap-4 mb-6 p-5 bg-[var(--body-bg)] rounded-xl border border-[var(--glass-border)] shadow-sm">
 								<div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
 									<div>
-										<label className="text-[10px] font-black text-[var(--text-muted)] uppercase ml-1 mb-1 block">Date</label>
-										<Input type="date" value={newHoliday.date} onChange={e => setNewHoliday({...newHoliday, date: e.target.value})} required className="bg-[var(--card-bg)] cursor-pointer font-bold text-[var(--text-muted)]" />
+										<label className="text-[10px] font-black text-[var(--text-muted)] uppercase ml-1 mb-1 block" htmlFor="holiday-date-input">Date</label>
+										<Input id="holiday-date-input" type="date" value={newHoliday.date} onChange={e => setNewHoliday({...newHoliday, date: e.target.value})} required className="bg-[var(--card-bg)] cursor-pointer font-bold text-[var(--text-muted)]" />
 									</div>
 									<div>
-										<label className="text-[10px] font-black text-[var(--text-muted)] uppercase ml-1 mb-1 block">Nom du jour</label>
-										<Input placeholder="ex: Lundi de Pâques" value={newHoliday.name} onChange={e => setNewHoliday({...newHoliday, name: e.target.value})} required className="bg-[var(--card-bg)] font-bold text-[var(--text-muted)]" />
+										<label className="text-[10px] font-black text-[var(--text-muted)] uppercase ml-1 mb-1 block" htmlFor="holiday-name-input">Nom du jour</label>
+										<Input id="holiday-name-input" placeholder="ex: Lundi de Pâques" value={newHoliday.name} onChange={e => setNewHoliday({...newHoliday, name: e.target.value})} required className="bg-[var(--card-bg)] font-bold text-[var(--text-muted)]" />
 									</div>
 									<div>
-										<label className="text-[10px] font-black text-[var(--text-muted)] uppercase ml-1 mb-1 block">Pays / Périmètre</label>
+										<label className="text-[10px] font-black text-[var(--text-muted)] uppercase ml-1 mb-1 block" htmlFor="holiday-country-select">Pays / Périmètre</label>
 										<div className="relative flex items-center">
 											<div className="absolute left-3 z-10 flex items-center pointer-events-none">
 												{newHoliday.id_pays === 0 ? <span className="text-xs">🌍</span> : <img src={getCountryFlagUrl(newHoliday.country)} alt="" className="w-4 h-auto rounded-sm shadow-xs" onError={(e) => e.target.style.display='none'} />}
 											</div>
-											<select className="w-full h-9 pl-9 pr-3 rounded-md border border-[var(--glass-border)] text-sm bg-[var(--card-bg)] outline-none font-bold text-[var(--text-muted)] focus-visible:ring-2 focus-visible:ring-emerald-600 transition-all shadow-sm" 
+											<select id="holiday-country-select" className="w-full h-9 pl-9 pr-3 rounded-md border border-[var(--glass-border)] text-sm bg-[var(--card-bg)] outline-none font-bold text-[var(--text-muted)] focus-visible:ring-2 focus-visible:ring-emerald-600 transition-all shadow-sm"
                                                     value={newHoliday.id_pays} 
                                                     onChange={e => { 
                                                         const selectedId = Number(e.target.value); 
@@ -2465,50 +2463,50 @@
                             <div className="grid grid-cols-2 md:grid-cols-5 lg:grid-cols-10 gap-x-4 gap-y-6 items-end">
                                 
                                 <div className="col-span-2 md:col-span-1 lg:col-span-1">
-                                    <label className="text-[10px] font-black uppercase text-[var(--text-muted)] ml-1 mb-1 block">Code PI</label>
-                                    <Input placeholder="2026.1" value={newHist.pi} onChange={e => setNewHist({...newHist, pi: e.target.value})} className="bg-[var(--card-bg)] font-bold text-[var(--text-main)] shadow-sm border-[var(--glass-border)]" />
+                                    <label className="text-[10px] font-black uppercase text-[var(--text-muted)] ml-1 mb-1 block" htmlFor="hist-pi">Code PI</label>
+                                    <Input id="hist-pi" placeholder="2026.1" value={newHist.pi} onChange={e => setNewHist({...newHist, pi: e.target.value})} className="bg-[var(--card-bg)] font-bold text-[var(--text-main)] shadow-sm border-[var(--glass-border)]" />
                                 </div>
                                 <div className="col-span-2 md:col-span-1 lg:col-span-1">
-                                    <label className="text-[10px] font-black uppercase text-[var(--text-muted)] ml-1 mb-1 block">Ordre</label>
-                                    <Input type="number" placeholder="1" value={newHist.ordre} onChange={e => setNewHist({...newHist, ordre: e.target.value})} className="bg-[var(--card-bg)] font-bold text-[var(--text-main)] shadow-sm border-[var(--glass-border)]" />
+                                    <label className="text-[10px] font-black uppercase text-[var(--text-muted)] ml-1 mb-1 block" htmlFor="hist-ordre">Ordre</label>
+                                    <Input id="hist-ordre" type="number" placeholder="1" value={newHist.ordre} onChange={e => setNewHist({...newHist, ordre: e.target.value})} className="bg-[var(--card-bg)] font-bold text-[var(--text-main)] shadow-sm border-[var(--glass-border)]" />
                                 </div>
                                 <div className="col-span-2 md:col-span-1 lg:col-span-1">
-                                    <label className="text-[10px] font-black uppercase text-[var(--text-main)] ml-1 mb-1 block">Total PI</label>
-                                    <Input type="number" value={newHist.total} onChange={e => setNewHist({...newHist, total: e.target.value})} className="bg-slate-800 text-white font-black border-slate-800 shadow-sm" />
+                                    <label className="text-[10px] font-black uppercase text-[var(--text-main)] ml-1 mb-1 block" htmlFor="hist-total">Total PI</label>
+                                    <Input id="hist-total" type="number" value={newHist.total} onChange={e => setNewHist({...newHist, total: e.target.value})} className="bg-slate-800 text-white font-black border-slate-800 shadow-sm" />
                                 </div>
                                 
                                 <div className="w-px h-10 bg-[var(--glass-border)] hidden lg:block justify-self-center"></div>
 
                                 <div className="col-span-2 md:col-span-1 lg:col-span-1">
-                                    <label className="text-[10px] font-black uppercase text-[var(--accent)] ml-1 mb-1 block">Build Glob.</label>
-                                    <Input type="number" value={newHist.build} onChange={e => setNewHist({...newHist, build: e.target.value})} className="bg-[var(--card-bg)] font-bold text-[var(--text-main)] shadow-sm border-b-[2px] border-b-[var(--accent)] rounded-b-none focus:ring-0 focus:border-[var(--accent)]" />
+                                    <label className="text-[10px] font-black uppercase text-[var(--accent)] ml-1 mb-1 block" htmlFor="hist-build">Build Glob.</label>
+                                    <Input id="hist-build" type="number" value={newHist.build} onChange={e => setNewHist({...newHist, build: e.target.value})} className="bg-[var(--card-bg)] font-bold text-[var(--text-main)] shadow-sm border-b-[2px] border-b-[var(--accent)] rounded-b-none focus:ring-0 focus:border-[var(--accent)]" />
                                 </div>
                                 <div className="col-span-2 md:col-span-1 lg:col-span-1">
-                                    <label className="text-[10px] font-black uppercase text-purple-600 ml-1 mb-1 block">MCO</label>
-                                    <Input type="number" value={newHist.mco} onChange={e => setNewHist({...newHist, mco: e.target.value})} className="bg-[var(--card-bg)] font-bold text-purple-800 shadow-sm border-b-[2px] border-b-purple-500 rounded-b-none focus:ring-0 focus:border-purple-700" />
+                                    <label className="text-[10px] font-black uppercase text-purple-600 ml-1 mb-1 block" htmlFor="hist-mco">MCO</label>
+                                    <Input id="hist-mco" type="number" value={newHist.mco} onChange={e => setNewHist({...newHist, mco: e.target.value})} className="bg-[var(--card-bg)] font-bold text-purple-800 shadow-sm border-b-[2px] border-b-purple-500 rounded-b-none focus:ring-0 focus:border-purple-700" />
                                 </div>
                                 <div className="col-span-2 md:col-span-1 lg:col-span-1">
-                                    <label className="text-[10px] font-black uppercase text-amber-600 ml-1 mb-1 block">TRA</label>
-                                    <Input type="number" value={newHist.tra} onChange={e => setNewHist({...newHist, tra: e.target.value})} className="bg-[var(--card-bg)] font-bold text-amber-800 shadow-sm border-b-[2px] border-b-amber-500 rounded-b-none focus:ring-0 focus:border-amber-700" />
+                                    <label className="text-[10px] font-black uppercase text-amber-600 ml-1 mb-1 block" htmlFor="hist-tra">TRA</label>
+                                    <Input id="hist-tra" type="number" value={newHist.tra} onChange={e => setNewHist({...newHist, tra: e.target.value})} className="bg-[var(--card-bg)] font-bold text-amber-800 shadow-sm border-b-[2px] border-b-amber-500 rounded-b-none focus:ring-0 focus:border-amber-700" />
                                 </div>
                                 <div className="col-span-2 md:col-span-1 lg:col-span-1">
-                                    <label className="text-[10px] font-black uppercase text-red-600 ml-1 mb-1 block">Ano. Build</label>
-                                    <Input type="number" value={newHist.anomalies} onChange={e => setNewHist({...newHist, anomalies: e.target.value})} className="bg-[var(--card-bg)] font-bold text-red-800 shadow-sm border-b-[2px] border-b-red-500 rounded-b-none focus:ring-0 focus:border-red-700" />
+                                    <label className="text-[10px] font-black uppercase text-red-600 ml-1 mb-1 block" htmlFor="hist-anomalies">Ano. Build</label>
+                                    <Input id="hist-anomalies" type="number" value={newHist.anomalies} onChange={e => setNewHist({...newHist, anomalies: e.target.value})} className="bg-[var(--card-bg)] font-bold text-red-800 shadow-sm border-b-[2px] border-b-red-500 rounded-b-none focus:ring-0 focus:border-red-700" />
                                 </div>
 
                                 <div className="w-px h-10 bg-[var(--glass-border)] hidden lg:block justify-self-center"></div>
                                 
                                 <div className="col-span-2 md:col-span-1 lg:col-span-1">
-                                    <label className="text-[10px] font-black uppercase text-[var(--text-muted)] ml-1 mb-1 block" title="Juste le Build">Apollo (B)</label>
-                                    <Input type="number" value={newHist.apollo} onChange={e => setNewHist({...newHist, apollo: e.target.value})} className="bg-[var(--card-bg)] font-bold text-[var(--text-muted)] shadow-sm border-[var(--glass-border)]" />
+                                    <label className="text-[10px] font-black uppercase text-[var(--text-muted)] ml-1 mb-1 block" title="Juste le Build" htmlFor="hist-apollo">Apollo (B)</label>
+                                    <Input id="hist-apollo" type="number" value={newHist.apollo} onChange={e => setNewHist({...newHist, apollo: e.target.value})} className="bg-[var(--card-bg)] font-bold text-[var(--text-muted)] shadow-sm border-[var(--glass-border)]" />
                                 </div>
                                 <div className="col-span-2 md:col-span-1 lg:col-span-1">
-                                    <label className="text-[10px] font-black uppercase text-[var(--text-muted)] ml-1 mb-1 block" title="Juste le Build">Disco (B)</label>
-                                    <Input type="number" value={newHist.disco} onChange={e => setNewHist({...newHist, disco: e.target.value})} className="bg-[var(--card-bg)] font-bold text-[var(--text-muted)] shadow-sm border-[var(--glass-border)]" />
+                                    <label className="text-[10px] font-black uppercase text-[var(--text-muted)] ml-1 mb-1 block" title="Juste le Build" htmlFor="hist-disco">Disco (B)</label>
+                                    <Input id="hist-disco" type="number" value={newHist.disco} onChange={e => setNewHist({...newHist, disco: e.target.value})} className="bg-[var(--card-bg)] font-bold text-[var(--text-muted)] shadow-sm border-[var(--glass-border)]" />
                                 </div>
                                 <div className="col-span-2 md:col-span-1 lg:col-span-1">
-                                    <label className="text-[10px] font-black uppercase text-pink-600 ml-1 mb-1 block" title="MCO + TRA + Build">All Stars</label>
-                                    <Input type="number" value={newHist.allstars} onChange={e => setNewHist({...newHist, allstars: e.target.value})} className="bg-[var(--card-bg)] font-bold text-pink-800 shadow-sm border-b-[2px] border-b-pink-500 rounded-b-none focus:ring-0 focus:border-pink-700" />
+                                    <label className="text-[10px] font-black uppercase text-pink-600 ml-1 mb-1 block" title="MCO + TRA + Build" htmlFor="hist-allstars">All Stars</label>
+                                    <Input id="hist-allstars" type="number" value={newHist.allstars} onChange={e => setNewHist({...newHist, allstars: e.target.value})} className="bg-[var(--card-bg)] font-bold text-pink-800 shadow-sm border-b-[2px] border-b-pink-500 rounded-b-none focus:ring-0 focus:border-pink-700" />
                                 </div>
                             </div>
 
@@ -2694,10 +2692,10 @@
                     <div className="max-w-7xl mx-auto px-6 pb-4">
                         <nav className="flex gap-2 p-1.5 bg-[var(--glass-border)]/30 rounded-2xl border border-white/40 w-fit backdrop-blur-md">
                             {[
-                                { id: 'dashboard', label: 'Overview', icon: 'fa-chart-pie' },
-                                { id: 'teams', label: 'Teams Board', icon: 'fa-users' },
-                                { id: 'sprints', label: 'Calendar', icon: 'fa-calendar-week', admin: true },
-                                { id: 'config', label: 'Settings', icon: 'fa-gear', admin: true }
+                                { id: 'dashboard', label: 'dashboard', icon: 'fa-chart-pie' },
+                                { id: 'teams', label: 'Board Équipes', icon: 'fa-users' },
+                                { id: 'sprints', label: 'Sprints', icon: 'fa-calendar-week', admin: true },
+                                { id: 'config', label: 'Configuration', icon: 'fa-gear', admin: true }
                             ].map(tab => (
                                 (!tab.admin || isAppAdmin) && (
                                     <button 
@@ -2892,9 +2890,3 @@
 </script>
 </body>
 </html>
-
-
-
-
-
-
