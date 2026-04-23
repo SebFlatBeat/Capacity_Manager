@@ -2,7 +2,7 @@
 ini_set('display_errors', 0); 
 error_reporting(0);
 header('Content-Type: application/json; charset=utf-8');
-require 'db.php';
+require '../config/db.php';
 
 if (!isset($dbconn) || !$dbconn) { exit; }
 
@@ -15,8 +15,11 @@ if ($method === 'POST') {
     
     if ($action === 'close_pi') {
         $query = "UPDATE historique_pi SET statut = 'ARCHIVE' WHERE pi_code = '$pi'";
-        if(@pg_query($dbconn, $query)) echo json_encode(array("status" => "success"));
-        else echo json_encode(array("status" => "error"));
+        if(@pg_query($dbconn, $query)) {
+            echo json_encode(array("status" => "success"));
+        } else {
+            echo json_encode(array("status" => "error"));
+        }
         exit;
     }
 
@@ -52,8 +55,11 @@ if ($method === 'POST') {
         $query = "INSERT INTO historique_pi (pi_code, total_pts, build_pts, mco_pts, tra_pts, anomalies_build_pts, apollo_pts, disco_pts, allstars_pts, ordre, statut, date_debut, date_fin, iterations, jours_par_iteration) 
                   VALUES ('$pi', $total, $build, $mco, $tra, $anomalies, $apollo, $disco, $allstars, $ordre, '$statut', $d_debut, $d_fin, $iters, $days_iter)";
     }
-    if(@pg_query($dbconn, $query)) echo json_encode(array("status" => "success"));
-    else echo json_encode(array("status" => "error", "message" => pg_last_error($dbconn)));
+    if(@pg_query($dbconn, $query)) {
+        echo json_encode(array("status" => "success"));
+    } else {
+        echo json_encode(array("status" => "error", "message" => pg_last_error($dbconn)));
+    }
     exit;
 }
 

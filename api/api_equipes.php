@@ -2,7 +2,7 @@
 ini_set('display_errors', 0); 
 error_reporting(0);
 header('Content-Type: application/json; charset=utf-8');
-require 'db.php';
+require '../config/db.php';
 
 if (!isset($dbconn) || !$dbconn) { exit; }
 
@@ -36,20 +36,28 @@ $global_train_avg = ($count_pis > 0) ? ($train_history_sum / $count_pis) : 0;
 // --- 3. CHARGEMENT DES KPI (Charge et Réalisé) ---
 $kpis = array();
 $q = pg_query($dbconn, "SELECT id_equipe, charge_engagee, realise, point_dev_jour FROM kpi_ratios_equipe WHERE pi_code = '$final_pi'");
-while($r = pg_fetch_assoc($q)) { $kpis[$r['id_equipe']] = $r; }
+if ($q) {
+    while($r = pg_fetch_assoc($q)) { $kpis[$r['id_equipe']] = $r; }
+}
 
 // --- 4. CHARGEMENT DES ABSENCES, MCO ET TRA (Recherche large sur les 2 formats) ---
 $absences = array();
 $q = pg_query($dbconn, "SELECT id_membre, numero_iteration, jours_conges FROM absences_sprints WHERE pi_code IN ('$pi_code', 'PI $pi_code')");
-if($q) while($r = pg_fetch_assoc($q)) { $absences[$r['id_membre']][$r['numero_iteration']] = (float)$r['jours_conges']; }
+if($q) {
+    while($r = pg_fetch_assoc($q)) { $absences[$r['id_membre']][$r['numero_iteration']] = (float)$r['jours_conges']; }
+}
 
 $mco = array();
 $q = pg_query($dbconn, "SELECT am.id_membre, s.numero_iteration FROM affectations_mco am JOIN sprints s ON am.id_sprint = s.id_sprint WHERE s.pi_code IN ('$pi_code', 'PI $pi_code')");
-if($q) while($r = pg_fetch_assoc($q)) { $mco[$r['id_membre']][$r['numero_iteration']] = 1; }
+if($q) {
+    while($r = pg_fetch_assoc($q)) { $mco[$r['id_membre']][$r['numero_iteration']] = 1; }
+}
 
 $tra = array();
 $q = pg_query($dbconn, "SELECT at.id_membre, s.numero_iteration, at.nb_semaines FROM affectations_tra at JOIN sprints s ON at.id_sprint = s.id_sprint WHERE s.pi_code IN ('$pi_code', 'PI $pi_code')");
-if($q) while($r = pg_fetch_assoc($q)) { $tra[$r['id_membre']][$r['numero_iteration']] = (float)$r['nb_semaines']; }
+if($q) {
+    while($r = pg_fetch_assoc($q)) { $tra[$r['id_membre']][$r['numero_iteration']] = (float)$r['nb_semaines']; }
+}
 
 // --- 5. STRUCTURE DES ÉQUIPES ---
 $res_equipes = pg_query($dbconn, "SELECT id_equipe, nom_equipe FROM equipes ORDER BY id_equipe");
@@ -128,11 +136,12 @@ if ($method === 'POST') {
             $query = "INSERT INTO kpi_ratios_equipe (id_equipe, pi_code, charge_engagee, realise, point_dev_jour) VALUES ($id_equipe, '$pi', $charge, $realise, $vel)";
         }
         
-        if (pg_query($dbconn, $query)) echo json_encode(array("status" => "success"));
-        else echo json_encode(array("status" => "error", "message" => pg_last_error($dbconn)));
-    }
-
-    elseif ($action === 'update_sprint_data') {
+        if (pg_query($dbconn, $query)) {
+            echo json_encode(array("status" => "success"));
+        } else {
+            echo json_encode(array("status" => "error", "message" => pg_last_error($dbconn)));
+        }
+    } elseif ($action === 'update_sprint_data') {
         $id_m = (int)$data['id_membre'];
         $pi = pg_escape_string($dbconn, utf8_decode($data['pi_code']));
         $iter = (int)$data['numero_iteration'];
@@ -145,19 +154,23 @@ if ($method === 'POST') {
             $query = "INSERT INTO absences_sprints (id_membre, pi_code, numero_iteration, jours_conges) VALUES ($id_m, '$pi', $iter, $abs)";
         }
 
-        if (pg_query($dbconn, $query)) echo json_encode(array("status" => "success"));
-        else echo json_encode(array("status" => "error", "message" => pg_last_error($dbconn)));
-    }
-
-    elseif ($action === 'add_member') {
+        if (pg_query($dbconn, $query)) {
+            echo json_encode(array("status" => "success"));
+        } else {
+            echo json_encode(array("status" => "error", "message" => pg_last_error($dbconn)));
+        }
+    } elseif ($action === 'add_member') {
         $id_e = pg_escape_string($dbconn, $data['id_equipe']);
         $id_p = (int)$data['id_pays'];
         $nom = pg_escape_string($dbconn, utf8_decode($data['nom']));
         $role = pg_escape_string($dbconn, utf8_decode($data['role']));
 
         $query = "INSERT INTO membres (nom, role, id_equipe, id_pays) VALUES ('$nom', '$role', '$id_e', $id_p)";
-        if (pg_query($dbconn, $query)) echo json_encode(array("status" => "success"));
-        else echo json_encode(array("status" => "error", "message" => pg_last_error($dbconn)));
+        if (pg_query($dbconn, $query)) {
+            echo json_encode(array("status" => "success"));
+        } else {
+            echo json_encode(array("status" => "error", "message" => pg_last_error($dbconn)));
+        }
     }
     exit;
 }
@@ -165,8 +178,11 @@ if ($method === 'POST') {
 if ($method === 'DELETE') {
     $id_m = (int)$data['id_membre'];
     $query = "DELETE FROM membres WHERE id_membre = $id_m";
-    if (pg_query($dbconn, $query)) echo json_encode(array("status" => "success"));
-    else echo json_encode(array("status" => "error"));
+    if (pg_query($dbconn, $query)) {
+        echo json_encode(array("status" => "success"));
+    } else {
+        echo json_encode(array("status" => "error"));
+    }
     exit;
 }
 

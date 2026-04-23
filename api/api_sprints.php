@@ -2,7 +2,7 @@
 ini_set('display_errors', 0); 
 error_reporting(0);
 header('Content-Type: application/json; charset=utf-8');
-require 'db.php';
+require '../config/db.php';
 
 if (!isset($dbconn) || !$dbconn) {
     echo json_encode(array("status" => "error", "message" => "Connexion BDD impossible."));
