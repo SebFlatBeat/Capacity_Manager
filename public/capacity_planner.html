@@ -714,11 +714,11 @@
 	const getCountryFlagUrl = (pays) => {
 		if (!pays || pays === 'Tous') return null; 
 		const p = String(pays).toLowerCase();
-		if (p.includes('valence')) return 'drapeau_esp.png';
-		if (p.includes('murcie')) return 'drapeau_esp.png';
-		if (p.includes('esp')) return 'drapeau_esp.png';
-		if (p.includes('france') || p.includes('fr')) return 'drapeau_fr.png';
-		return 'drapeau_fr.png'; // Fallback
+		if (p.includes('valence')) return 'assets/images/drapeau_esp.png';
+		if (p.includes('murcie')) return 'assets/images/drapeau_esp.png';
+		if (p.includes('esp')) return 'assets/images/drapeau_esp.png';
+		if (p.includes('france') || p.includes('fr')) return 'assets/images/drapeau_fr.png';
+		return 'assets/images/drapeau_fr.png'; // Fallback
 		}
 	/**
 	 * CAPACITY PLANNER - APPLICATION CORE
